@@ -166,6 +166,9 @@ async function connect(){
  $('msg').textContent='Koneksi database tersimpan. Silakan login.';
 }
 async function login(){
+  const savedUrl=localStorage.getItem('supabase_url')||'', savedKey=localStorage.getItem('supabase_key')||'';
+  if(savedUrl) supaUrl=savedUrl;
+  if(savedKey) supaKey=savedKey;
  const email=$('loginEmail').value.trim(), password=$('loginPassword').value;
  $('loginMsg').textContent='Memproses login...';
  try{
