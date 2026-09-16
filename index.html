@@ -53,7 +53,8 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
    <div class="notice" style="margin:6px 0">Isi sekali di browser ini. Gunakan Project URL dan Publishable Key dari Supabase.</div>
    <div class="full"><label>Project URL</label><input id="loginSupaUrl" type="url" placeholder="https://xxxx.supabase.co"></div>
    <div class="full"><label>Publishable Key</label><input id="loginSupaKey" type="text" placeholder="sb_publishable_..."></div>
-   <div class="full actions"><button id="saveLoginConnection" class="btn secondary" type="button">💾 Simpan Koneksi</button></div>
+   <div class="full actions"><button id="saveLoginConnection" class="btn secondary" type="button"
+onclick="(function(){var u=document.getElementById('loginSupaUrl').value.trim().replace(/\/$/,''),k=document.getElementById('loginSupaKey').value.trim(),m=document.getElementById('loginConnMsg');if(!u||!k){m.textContent='Isi Project URL dan Publishable Key terlebih dahulu.';return}if(!/^https:\/\/[^ ]+\.supabase\.co$/.test(u)){m.textContent='Project URL harus seperti https://xxxx.supabase.co';return}localStorage.setItem('supabase_url',u);localStorage.setItem('supabase_key',k);m.textContent='Koneksi Supabase tersimpan ✓. Sekarang silakan login.';})();">💾 Simpan Koneksi</button></div>
    <div id="loginConnMsg" class="notice"></div>
   </div>
   <form id="loginForm">
