@@ -495,4 +495,11 @@ if(ss&&supaUrl&&supaKey){
   });
  }catch(_){localStorage.removeItem('supabase_session')}
 }
+
+// V8.1 FIX3: expose user-management functions for GitHub Pages inline handlers.
+window.adminApi=adminApi;
+window.loadUsers=loadUsers;
+window.changeUserRole=changeUserRole;
+window.toggleUser=toggleUser;
+window.deleteUser=deleteUser;
 </script></body></html>
