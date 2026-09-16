@@ -12,6 +12,11 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 .actions{display:flex;justify-content:flex-end;gap:8px}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}.toolbar>*{flex:1;min-width:130px}.tablewrap{overflow:auto;max-height:540px;border:1px solid #edf0f4;border-radius:10px}table{border-collapse:collapse;width:100%;min-width:780px}th,td{padding:9px;border-bottom:1px solid #edf0f4;text-align:left;font-size:13px}th{background:#f8fafc;position:sticky;top:0}.notice{font-size:12px;color:#667085;margin-top:8px}.status{font-size:12px;padding:7px 10px;border-radius:999px;background:#eef2f7}.ok{background:#dcfce7;color:#166534}.err{background:#fee2e2;color:#991b1b}
 @media(max-width:750px){.grid{grid-template-columns:1fr 1fr}form{grid-template-columns:1fr}.full{grid-column:auto}.head{align-items:flex-start}}@media(max-width:450px){.grid{grid-template-columns:1fr}.brand{font-size:17px}}
 
+@media print{
+ header,nav,.toolbar,.btn,.notice{display:none!important}body{background:white}.panel,.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.view{display:block!important}
+}
+.chartgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;align-items:end;height:220px;padding:8px 0}.barcol{height:200px;display:flex;align-items:flex-end;justify-content:center;gap:3px}.bar{width:45%;min-width:4px;border-radius:5px 5px 0 0}.inbar{background:#0b8f6a}.outbar{background:#d14343}.balbar{background:#334155}.axislabel{text-align:center;font-size:11px}.legend{display:flex;gap:16px;font-size:12px;margin-top:8px}.legend span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}.legend .li:before{background:#0b8f6a}.legend .lo:before{background:#d14343}.legend .lb:before{background:#334155}
+.user-role{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;background:#e9eef7}.user-admin{background:#fef3c7;color:#92400e}.user-active{color:#087f5b}.user-disabled{color:#991b1b}@media(max-width:650px){.head{align-items:flex-start}.toolbar>*{min-width:100%}}\n
 /* Kartu ringkasan laporan: 6 kartu -> 3 kolom, tetap responsif di Android. */
 .grid6{grid-template-columns:repeat(3,1fr)}
 @media(max-width:750px){.grid6{grid-template-columns:1fr 1fr}}
@@ -49,26 +54,33 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
   <h2 style="margin:0 0 5px">Uang Kas Accounting 2026</h2>
   <div class="notice" style="margin-bottom:18px">Login untuk mengakses data kas online.</div>
   <form id="loginForm">
-   <div class="full"><label>Email</label><input id="loginEmail" type="email" autocomplete="email" required></div>
-   <div class="full"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
+   <div class="full"><label>Nama Pengguna</label><input id="loginUsername" type="text" autocomplete="username" required placeholder="Contoh: agungardi"></div>
+   <div class="full"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Password"></div>
    <div class="full actions"><button class="btn primary" type="submit">🔐 Login</button></div>
   </form>
-  <div class="notice">Akun dibuat oleh Admin melalui Supabase Authentication.</div><div id="loginConnection" class="notice" style="margin:10px 0;text-align:left"><b>Koneksi Supabase</b><div style="margin-top:8px"><input id="loginUrl" placeholder="Project URL (https://xxxx.supabase.co)" style="width:100%;margin-bottom:7px"><input id="loginKey" placeholder="Publishable Key (sb_publishable_...)" style="width:100%;margin-bottom:7px"><button type="button" class="btn secondary" onclick="saveLoginConnection()">Simpan Koneksi</button></div></div>
-<div id="loginMsg" class="notice"></div>
+  <div class="notice">Login menggunakan Nama Pengguna + Password. Email tetap tersimpan di Supabase sebagai identitas akun.</div>
+  <div style="margin-top:14px;text-align:left"><button type="button" class="btn secondary" onclick="toggleLoginConnection()">⚙️ Atur Koneksi Supabase</button>
+   <div id="loginConnPanel" class="panel" style="display:none;margin-top:10px;background:#f8fafc">
+    <label>Project URL</label><input id="loginUrl" placeholder="https://xxxx.supabase.co">
+    <br><br><label>Publishable Key</label><input id="loginKey" type="password" placeholder="sb_publishable_...">
+    <br><br><button type="button" class="btn primary" onclick="saveLoginConnection()">Simpan Koneksi</button>
+    <div id="loginConnMsg" class="notice"></div>
+   </div>
+  </div><div id="loginMsg" class="notice"></div>
  </div>
 </div>
 <div id="appShell" style="display:none">
-<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026</div><div class="sub">Database Supabase • Online • V8</div></div>
+<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V8.3</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
 <nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings">Koneksi</button></nav></header>
 <main>
 <section id="dashboard" class="view active"><div class="panel" style="margin-top:0;margin-bottom:14px"><b>Dashboard Kas Terintegrasi</b><div class="notice">Iuran anggota otomatis dihitung sebagai kas masuk pada saldo akhir.</div></div><div class="grid">
-<div class="card"><div class="label">Saldo Awal</div><div id="opening" class="value">Rp 0</div></div>
-<div class="card"><div class="label">Kas Masuk</div><div id="tin" class="value green">Rp 0</div></div>
-<div class="card"><div class="label">Iuran Anggota</div><div id="dues" class="value green">Rp 0</div></div>
-<div class="card"><div class="label">Kas Masuk Lain</div><div id="otherin" class="value green">Rp 0</div></div>
-<div class="card"><div class="label">Kas Keluar</div><div id="tout" class="value red">Rp 0</div></div>
-<div class="card"><div class="label">Saldo Akhir</div><div id="bal" class="value">Rp 0</div></div>
+<div class="card"><div class="label">Saldo Awal</div><div id="opening" class="value">Rp0</div></div>
+<div class="card"><div class="label">Kas Masuk</div><div id="tin" class="value green">Rp0</div></div>
+<div class="card"><div class="label">Iuran Anggota</div><div id="dues" class="value green">Rp0</div></div>
+<div class="card"><div class="label">Kas Masuk Lain</div><div id="otherin" class="value green">Rp0</div></div>
+<div class="card"><div class="label">Kas Keluar</div><div id="tout" class="value red">Rp0</div></div>
+<div class="card"><div class="label">Saldo Akhir</div><div id="bal" class="value">Rp0</div></div>
 </div><div class="panel">
 <h3>Grafik Kas</h3>
 <div class="toolbar">
@@ -92,6 +104,18 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div class="toolbar"><select id="m"></select><input id="pm" type="month" value="2026-09"><input id="pa" type="number" value="20000" min="0"><button class="btn primary" onclick="pay()">Simpan Iuran</button></div><div class="notice">Klik Simpan Iuran untuk mengubah status anggota pada bulan yang dipilih. Tabel menampilkan status September–Desember 2026.</div>
 <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Sep</th><th>Okt</th><th>Nov</th><th>Des</th><th>Total</th></tr></thead><tbody id="mb"></tbody></table></div></div></section>
 
+<section id="users" class="view">
+<div class="panel"><h3>👥 Manajemen Pengguna</h3><div class="notice">Menu ini hanya terlihat oleh Admin. User biasa tidak dapat mengelola akun.</div></div>
+<div class="panel"><h3>Tambah Pengguna</h3><form id="userForm">
+<div><label>Nama Pengguna</label><input id="newUserUsername" type="text" required placeholder="contoh: agungardi" pattern="[A-Za-z0-9._-]{3,30}"></div>
+<div><label>Email</label><input id="newUserEmail" type="email" required placeholder="nama@email.com"></div>
+<div><label>Password sementara</label><input id="newUserPassword" type="password" minlength="6" required placeholder="Minimal 6 karakter"></div>
+<div><label>Role</label><select id="newUserRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
+<div class="actions" style="align-items:end"><button class="btn primary" type="submit">+ Buat Pengguna</button></div>
+</form><div id="userMsg" class="notice"></div></div>
+<div class="panel"><div class="toolbar"><input id="userSearch" placeholder="Cari nama pengguna / email..."><button class="btn secondary" onclick="loadUsers()">↻ Refresh</button></div>
+<div class="tablewrap"><table style="min-width:780px"><thead><tr><th>Nama Pengguna</th><th>Email</th><th>Role</th><th>Status</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="userTable"></tbody></table></div></div>
+</section>
 <section id="reports" class="view">
 <div class="printonly" style="margin-bottom:10px;border-bottom:2px solid #0f172a;padding-bottom:6px">
  <div style="font-size:17px;font-weight:800">Uang Kas Accounting 2026 &mdash; Laporan Kas</div>
@@ -117,18 +141,6 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div class="panel"><h3 id="rpDuesTitle">Rekap Iuran Anggota</h3><div class="tablewrap"><table style="min-width:760px"><thead><tr><th>Nama Anggota</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th><th>Total</th><th>Status</th></tr></thead><tbody id="rpDues"></tbody></table></div></div>
 <div class="panel"><h3 id="rpChartTitle">Grafik Kas Masuk vs Kas Keluar per Bulan</h3><div id="rpChartIO"></div><div id="rpChartBal"></div></div>
 </section>
-
-<section id="users" class="view">
-<div class="panel"><h3>👥 Manajemen Pengguna</h3><div class="notice">Menu ini hanya terlihat oleh Admin. User biasa tidak dapat mengelola akun.</div></div>
-<div class="panel"><h3>Tambah Pengguna</h3><form id="userForm">
-<div><label>Email</label><input id="newUserEmail" type="email" required placeholder="nama@email.com"></div>
-<div><label>Password sementara</label><input id="newUserPassword" type="password" minlength="6" required placeholder="Minimal 6 karakter"></div>
-<div><label>Role</label><select id="newUserRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
-<div class="actions" style="align-items:end"><button class="btn primary" type="submit">+ Buat Pengguna</button></div>
-</form><div id="userMsg" class="notice"></div></div>
-<div class="panel"><div class="toolbar"><input id="userSearch" placeholder="Cari email..."><button class="btn secondary" onclick="loadUsers()">↻ Refresh</button></div>
-<div class="tablewrap"><table style="min-width:650px"><thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="userTable"></tbody></table></div></div>
-</section>
 <section id="settings" class="view"><div class="panel"><h3>Koneksi Supabase</h3>
 <p class="notice">Masukkan <b>Project URL</b> dan <b>Publishable key</b> dari tombol Connect di Supabase. Setelah tersimpan, pengguna harus login dengan akun Supabase Auth. Nilai disimpan hanya di browser ini. Jika tombol tidak merespons, gunakan versi terbaru ini karena tidak bergantung pada library eksternal.</p>
 <label>Project URL</label><input id="url" placeholder="https://xxxx.supabase.co"><br><br><label>Publishable Key</label><input id="key" type="password" placeholder="sb_publishable_..."><br><br>
@@ -136,9 +148,8 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 </main>
 </div>
 <script>
-let sb=null, supaUrl='', supaKey='', accessToken='', currentUser=null, currentRole='user', members=[], transactions=[], payments=[], opening=0;
-const nf=new Intl.NumberFormat('id-ID',{maximumFractionDigits:0});
-const rp=n=>{const v=Math.round(+n||0);return (v<0?'-Rp ':'Rp ')+nf.format(Math.abs(v))};
+let sb=null, supaUrl='', supaKey='', accessToken='', currentUser=null, currentRole='user', currentUsername='', members=[], transactions=[], payments=[], opening=0;
+const rp=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(+n||0);
 const $=id=>document.getElementById(id);
 function setStatus(t,ok=false){$('status').textContent=t;$('status').className='status '+(ok?'ok':'err')}
 async function rest(path, options={}){
@@ -169,15 +180,15 @@ async function adminApi(action,payload={}){
 async function loadUsers(){
  if(currentRole!=='admin'||!$('userTable'))return;
  try{const d=await adminApi('list');const q=($('userSearch').value||'').toLowerCase();
- $('userTable').innerHTML=(d.users||[]).filter(u=>(u.email||'').toLowerCase().includes(q)).map(u=>{
+ $('userTable').innerHTML=(d.users||[]).filter(u=>(u.username||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)).map(u=>{
  const me=currentUser&&u.id===currentUser.id;
- return `<tr><td><b>${esc(u.email||'-')}</b>${me?' <small>(Anda)</small>':''}</td><td><span class="user-role ${u.role==='admin'?'user-admin':''}">${u.role==='admin'?'👑 Admin':'👤 User'}</span></td><td class="${u.disabled?'user-disabled':'user-active'}">${u.disabled?'Nonaktif':'Aktif'}</td><td>${u.created_at?new Date(u.created_at).toLocaleDateString('id-ID'):'-'}</td><td>${me?'—':`<button class="btn secondary" onclick="changeUserRole('${u.id}','${u.role==='admin'?'user':'admin'}')">${u.role==='admin'?'Jadikan User':'Jadikan Admin'}</button> <button class="btn secondary" onclick="toggleUser('${u.id}',${!u.disabled})">${u.disabled?'Aktifkan':'Nonaktifkan'}</button> <button class="btn danger" onclick="deleteUser('${u.id}')">Hapus</button>`}</td></tr>`}).join('')||'<tr><td colspan="5">Tidak ada pengguna.</td></tr>';
+ return `<tr><td><b>${esc(u.username||'-')}</b>${me?' <small>(Anda)</small>':''}</td><td>${esc(u.email||'-')}</td><td><span class="user-role ${u.role==='admin'?'user-admin':''}">${u.role==='admin'?'👑 Admin':'👤 User'}</span></td><td class="${u.disabled?'user-disabled':'user-active'}">${u.disabled?'Nonaktif':'Aktif'}</td><td>${u.created_at?new Date(u.created_at).toLocaleDateString('id-ID'):'-'}</td><td>${me?'—':`<button class="btn secondary" onclick="changeUserRole('${u.id}','${u.role==='admin'?'user':'admin'}')">${u.role==='admin'?'Jadikan User':'Jadikan Admin'}</button> <button class="btn secondary" onclick="toggleUser('${u.id}',${!u.disabled})">${u.disabled?'Aktifkan':'Nonaktifkan'}</button> <button class="btn danger" onclick="deleteUser('${u.id}')">Hapus</button>`}</td></tr>`}).join('')||'<tr><td colspan="6">Tidak ada pengguna.</td></tr>';
  }catch(e){$('userMsg').textContent='Gagal memuat pengguna: '+e.message}
 }
 async function changeUserRole(id,role){if(!confirm('Ubah role menjadi '+role+'?'))return;try{await adminApi('set_role',{user_id:id,role});await loadUsers()}catch(e){alert(e.message)}}
 async function toggleUser(id,disabled){if(!confirm(disabled?'Nonaktifkan pengguna ini?':'Aktifkan pengguna ini?'))return;try{await adminApi('set_disabled',{user_id:id,disabled});await loadUsers()}catch(e){alert(e.message)}}
 async function deleteUser(id){if(!confirm('Hapus akun ini? Tindakan tidak dapat dibatalkan.'))return;try{await adminApi('delete',{user_id:id});await loadUsers()}catch(e){alert(e.message)}}
-$('userForm').onsubmit=async e=>{e.preventDefault();try{$('userMsg').textContent='Membuat pengguna...';await adminApi('create',{email:$('newUserEmail').value.trim(),password:$('newUserPassword').value,role:$('newUserRole').value});$('userForm').reset();$('userMsg').textContent='Pengguna berhasil dibuat.';await loadUsers()}catch(err){$('userMsg').textContent='Gagal: '+err.message}};
+$('userForm').onsubmit=async e=>{e.preventDefault();try{$('userMsg').textContent='Membuat pengguna...';await adminApi('create',{username:$('newUserUsername').value.trim(),email:$('newUserEmail').value.trim(),password:$('newUserPassword').value,role:$('newUserRole').value});$('userForm').reset();$('userMsg').textContent='Pengguna berhasil dibuat.';await loadUsers()}catch(err){$('userMsg').textContent='Gagal: '+err.message}};
 $('userSearch').oninput=loadUsers;
 async function connect(){
  const url=$('url').value.trim().replace(/\/$/,''), key=$('key').value.trim();
@@ -186,28 +197,36 @@ async function connect(){
  supaUrl=url;supaKey=key;localStorage.setItem('supabase_url',url);localStorage.setItem('supabase_key',key);
  $('msg').textContent='Koneksi database tersimpan. Silakan login.';
 }
-async function saveLoginConnection(){const url=($('loginUrl').value||'').trim().replace(/\/$/,'');const key=($('loginKey').value||'').trim();if(!url||!key){$('loginMsg').textContent='Isi Project URL dan Publishable Key terlebih dahulu.';return}if(!/^https:\/\/[^ ]+\.supabase\.co$/.test(url)){$('loginMsg').textContent='Project URL harus seperti https://xxxx.supabase.co';return}supaUrl=url;supaKey=key;localStorage.setItem('supabase_url',url);localStorage.setItem('supabase_key',key);$('loginMsg').textContent='Koneksi Supabase tersimpan ✓. Sekarang silakan login.';}
+async function resolveLoginUsername(username){
+ const r=await fetch(supaUrl+'/functions/v1/admin-users',{method:'POST',headers:{'Content-Type':'application/json',apikey:supaKey},body:JSON.stringify({action:'resolve_login',username})});
+ const t=await r.text();let d;try{d=t?JSON.parse(t):{}}catch(_){d={error:t}}
+ if(!r.ok)throw new Error(d.error||'Nama pengguna tidak ditemukan.');
+ return d.email;
+}
+function toggleLoginConnection(){const p=$('loginConnPanel');p.style.display=p.style.display==='none'?'block':'none';if(p.style.display==='block'){ $('loginUrl').value=localStorage.getItem('supabase_url')||''; $('loginKey').value=localStorage.getItem('supabase_key')||''; }}
+function saveLoginConnection(){const url=$('loginUrl').value.trim().replace(/\/$/,''),key=$('loginKey').value.trim();if(!url||!key){$('loginConnMsg').textContent='Project URL dan Publishable Key wajib diisi.';return}if(!/^https:\/\/[^ ]+\.supabase\.co$/.test(url)){ $('loginConnMsg').textContent='Project URL tidak valid.';return }supaUrl=url;supaKey=key;localStorage.setItem('supabase_url',url);localStorage.setItem('supabase_key',key);$('loginConnMsg').textContent='Koneksi tersimpan.';}
 async function login(){
- const email=$('loginEmail').value.trim(), password=$('loginPassword').value;
- const savedUrl=localStorage.getItem('supabase_url'), savedKey=localStorage.getItem('supabase_key');
- if(savedUrl&&savedKey){supaUrl=savedUrl;supaKey=savedKey;}
+ const username=$('loginUsername').value.trim().toLowerCase(), password=$('loginPassword').value;
  $('loginMsg').textContent='Memproses login...';
  try{
+  if(!supaUrl||!supaKey){const u=localStorage.getItem('supabase_url'),k=localStorage.getItem('supabase_key');if(u&&k){supaUrl=u;supaKey=k}}
   if(!supaUrl||!supaKey) throw new Error('Koneksi Supabase belum disetel.');
+  if(!username) throw new Error('Nama pengguna wajib diisi.');
+  const email=await resolveLoginUsername(username);
   const d=await authRequest('token?grant_type=password',{email,password});
   accessToken=d.access_token; currentUser=d.user;
   localStorage.setItem('supabase_session',JSON.stringify({access_token:d.access_token,user:d.user}));
   const ok=await load();
   if(!ok) throw new Error('Login berhasil tetapi akses database belum siap. Jalankan setup_auth.sql di Supabase.');
   $('loginScreen').style.display='none';$('appShell').style.display='block';
-  $('userInfo').textContent=(currentUser.email||'')+' • '+currentRole;
-  $('accountInfo').textContent=(currentUser.email||'')+' • Role: '+currentRole;
+  $('userInfo').textContent=(currentUsername||currentUser.email||'')+' • '+currentRole;
+  $('accountInfo').textContent=(currentUsername||currentUser.email||'')+' • Role: '+currentRole;
   applyRoleUI();
  }catch(e){$('loginMsg').textContent='Login gagal: '+(e.message||String(e))}
 }
 async function logout(){
  accessToken='';currentUser=null;currentRole='user';localStorage.removeItem('supabase_session');
- $('appShell').style.display='none';$('loginScreen').style.display='flex';$('loginPassword').value='';$('loginMsg').textContent='';
+ $('appShell').style.display='none';$('loginScreen').style.display='flex';$('loginUsername').value='';$('loginPassword').value='';$('loginMsg').textContent='';
 }
 async function load(){
  const u=localStorage.getItem('supabase_url'),k=localStorage.getItem('supabase_key');
@@ -221,11 +240,11 @@ async function load(){
   members=await rest('members?select=*&order=id')||[];
   transactions=await rest('transactions?select=*&order=transaction_date.asc,id.asc')||[];
   payments=await rest('member_payments?select=*')||[];
-  try{const p=await rest('profiles?id=eq.'+encodeURIComponent(currentUser.id)+'&select=role');currentRole=p?.[0]?.role||'user'}catch(_){currentRole='user'}
+  try{const p=await rest('profiles?id=eq.'+encodeURIComponent(currentUser.id)+'&select=role,username');currentRole=p?.[0]?.role||'user';currentUsername=p?.[0]?.username||''}catch(_){currentRole='user';currentUsername=''}
   opening=763301;
   setStatus('Terhubung ✓',true);render();
-  if($('userInfo'))$('userInfo').textContent=(currentUser.email||'')+' • '+currentRole;
-  if($('accountInfo'))$('accountInfo').textContent=(currentUser.email||'')+' • Role: '+currentRole;
+  if($('userInfo'))$('userInfo').textContent=(currentUsername||currentUser.email||'')+' • '+currentRole;
+  if($('accountInfo'))$('accountInfo').textContent=(currentUsername||currentUser.email||'')+' • Role: '+currentRole;
   applyRoleUI();
   return true;
  }catch(e){setStatus('Gagal terhubung');if($('msg'))$('msg').textContent='Koneksi gagal: '+(e.message||String(e));return false}
@@ -283,8 +302,9 @@ function renderMembers(){
  $('m').innerHTML=members.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
  $('mb').innerHTML=members.map(x=>{
    let vals=ms.map(k=>payments.find(p=>p.member_id===x.id&&(p.payment_month||'').startsWith(k))?.amount||0);
-   return `<tr><td><b>${esc(x.name)}</b></td>${vals.map(v=>`<td>${v?'<span class="status ok">Sudah</span>':'<span class="status err">Belum</span>'}${v?`<br><small>${rp(v)}</small>`:''}</td>`).join('')}<td><b>${rp(vals.reduce((a,b)=>a+b,0))}</b></td></tr>`
+   return `<tr><td><b>${esc(x.name)}</b></td>${ms.map((k,i)=>{const p=payments.find(p=>p.member_id===x.id&&(p.payment_month||'').startsWith(k));const v=p?.amount||0;return `<td>${v?'<span class="status ok">Sudah</span>':'<span class="status err">Belum</span>'}${v?`<br><small>${rp(v)}</small><br><button data-admin-only class="btn danger" style="margin-top:5px;padding:4px 8px;font-size:11px" onclick="delPayment(${p.id})">Hapus</button>`:''}</td>`}).join('')}<td><b>${rp(vals.reduce((a,b)=>a+b,0))}</b></td></tr>`
  }).join('');
+ applyRoleUI();
 }
 /* ============================ V8 — LAPORAN ============================
    Halaman laporan membaca data yang sama dengan dashboard (transactions,
@@ -472,19 +492,21 @@ $('editForm').onsubmit=async e=>{
 };
 async function addMember(){let n=$('newName').value.trim();if(!n)return;try{await rest('members',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({name:n})});$('newName').value='';await load()}catch(err){alert(err.message)}}
 async function pay(){let id=+$('m').value, month=$('pm').value+'-15',amount=+$('pa').value||0;try{await rest('member_payments',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({member_id:id,payment_month:month,amount})});await load()}catch(err){alert(err.message)}}
-function showView(v){
- document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if(b.dataset.v==='users'&&currentRole!=='admin')return;document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(b.dataset.v).classList.add('active');if(b.dataset.v==='users')loadUsers()});
- document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
- const el=$(v); if(el)el.classList.add('active');
- if(v==='reports')renderReport();
+async function delPayment(id){if(currentRole!=='admin'){alert('Hanya Admin yang dapat menghapus iuran.');return}if(!confirm('Hapus iuran ini? Data akan langsung dihapus dan saldo/laporan akan dihitung ulang.'))return;try{const d=await adminApi('delete_payment',{payment_id:id});if(!d?.success)throw new Error(d?.error||'Gagal menghapus iuran.');await load()}catch(err){alert(err.message)}}
+async function delPayment(id){
+  if(currentRole!=='admin'){alert('Hanya Admin yang dapat menghapus iuran.');return}
+  if(!confirm('Hapus iuran ini? Data akan langsung dihapus dan saldo/laporan akan dihitung ulang.'))return;
+  try{
+    const d=await adminApi('delete_payment',{payment_id:id});
+    if(!d?.success)throw new Error(d?.error||'Gagal menghapus iuran.');
+    await load();
+  }catch(err){alert(err.message)}
 }
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>showView(b.dataset.v));
-$('q').oninput=renderTx;$('mo').oninput=renderTx;$('yearFilter').onchange=render;$('monthFilter').onchange=render;
-['rpYear','rpMonth','rpCat'].forEach(id=>$(id).onchange=renderReport);$('rpQ').oninput=renderReport;
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if(b.dataset.v==='users'&&currentRole!=='admin')return;document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(b.dataset.v).classList.add('active');if(b.dataset.v==='users')loadUsers();if(b.dataset.v==='reports')renderReport()});
+$('q').oninput=renderTx;$('mo').oninput=renderTx;$('yearFilter').onchange=render;$('monthFilter').onchange=render;['rpYear','rpMonth','rpCat'].forEach(id=>$(id).onchange=renderReport);$('rpQ').oninput=renderReport;
 $('url').value=localStorage.getItem('supabase_url')||'';$('key').value=localStorage.getItem('supabase_key')||'';$('date').value=new Date().toISOString().slice(0,10);
 $('loginForm').onsubmit=e=>{e.preventDefault();login()};$('logoutBtn').onclick=logout;
 const su=localStorage.getItem('supabase_url'),sk=localStorage.getItem('supabase_key'),ss=localStorage.getItem('supabase_session');
-if($('loginUrl'))$('loginUrl').value=su||'';if($('loginKey'))$('loginKey').value=sk||'';
 if(su&&sk){supaUrl=su;supaKey=sk}
 if(ss&&supaUrl&&supaKey){
  try{
@@ -495,11 +517,4 @@ if(ss&&supaUrl&&supaKey){
   });
  }catch(_){localStorage.removeItem('supabase_session')}
 }
-
-// V8.1 FIX3: expose user-management functions for GitHub Pages inline handlers.
-window.adminApi=adminApi;
-window.loadUsers=loadUsers;
-window.changeUserRole=changeUserRole;
-window.toggleUser=toggleUser;
-window.deleteUser=deleteUser;
 </script></body></html>
