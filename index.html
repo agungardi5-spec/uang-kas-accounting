@@ -48,6 +48,14 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
   <div style="font-size:30px;margin-bottom:5px">💰</div>
   <h2 style="margin:0 0 5px">Uang Kas Accounting 2026</h2>
   <div class="notice" style="margin-bottom:18px">Login untuk mengakses data kas online.</div>
+  <div class="panel" style="margin:0 0 14px;padding:12px;background:#eef6ff;border:1px solid #cfe3ff">
+   <b>⚙️ Koneksi Supabase</b>
+   <div class="notice" style="margin:6px 0">Isi sekali di browser ini. Gunakan Project URL dan Publishable Key dari Supabase.</div>
+   <div class="full"><label>Project URL</label><input id="loginSupaUrl" type="url" placeholder="https://xxxx.supabase.co"></div>
+   <div class="full"><label>Publishable Key</label><input id="loginSupaKey" type="text" placeholder="sb_publishable_..."></div>
+   <div class="full actions"><button id="saveLoginConnection" class="btn secondary" type="button">💾 Simpan Koneksi</button></div>
+   <div id="loginConnMsg" class="notice"></div>
+  </div>
   <form id="loginForm">
    <div class="full"><label>Email</label><input id="loginEmail" type="email" autocomplete="email" required></div>
    <div class="full"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
