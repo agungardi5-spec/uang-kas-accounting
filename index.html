@@ -182,7 +182,7 @@ async function connect(){
  $('msg').textContent='Koneksi database tersimpan. Silakan login.';
 }
 async function saveLoginConnection(){const url=($('loginUrl').value||'').trim().replace(/\/$/,'');const key=($('loginKey').value||'').trim();if(!url||!key){$('loginMsg').textContent='Isi Project URL dan Publishable Key terlebih dahulu.';return}if(!/^https:\/\/[^ ]+\.supabase\.co$/.test(url)){$('loginMsg').textContent='Project URL harus seperti https://xxxx.supabase.co';return}supaUrl=url;supaKey=key;localStorage.setItem('supabase_url',url);localStorage.setItem('supabase_key',key);$('loginMsg').textContent='Koneksi Supabase tersimpan ✓. Sekarang silakan login.';}
-function login(){
+async function login(){
  const email=$('loginEmail').value.trim(), password=$('loginPassword').value;
  const savedUrl=localStorage.getItem('supabase_url'), savedKey=localStorage.getItem('supabase_key');
  if(savedUrl&&savedKey){supaUrl=savedUrl;supaKey=savedKey;}
