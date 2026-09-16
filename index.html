@@ -161,6 +161,11 @@ async function authRequest(path, body, method='POST', token=null){
  if(!r.ok) throw new Error(data?.msg||data?.message||data?.error_description||data||('Auth HTTP '+r.status));
  return data;
 }
+async function adminApi(action,payload={}){
+ const r=await fetch(supaUrl+'/functions/v1/admin-users',{method:'POST',headers:{'Content-Type':'application/json',apikey:supaKey,Authorization:'Bearer '+accessToken},body:JSON.stringify({action,...payload})});
+ const t=await r.text();let d;try{d=t?JSON.parse(t):{}}catch(_){d={error:t}}
+ if(!r.ok)throw new Error(d.error||d.message||('HTTP '+r.status));return d;
+}
 async function loadUsers(){
  if(currentRole!=='admin'||!$('userTable'))return;
  try{const d=await adminApi('list');const q=($('userSearch').value||'').toLowerCase();
