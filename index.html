@@ -71,6 +71,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V9.0</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
 <nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="activities">Kegiatan</button>
+<button class="tab" data-v="dues-monitor">Monitoring Iuran</button>
 <button class="tab" data-v="audit" data-admin-only>Audit Log</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings" data-admin-only>Koneksi</button></nav></header>
 <main>
 <section id="dashboard" class="view active"><div class="panel" style="margin-top:0;margin-bottom:14px"><b>Dashboard Kas Terintegrasi</b><div class="notice">Iuran anggota otomatis dihitung sebagai kas masuk pada saldo akhir.</div></div><div class="grid">
@@ -110,8 +111,20 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div><span style="display:none"><label>Email</label><span style="display:none"><input id="newUserEmail" type="hidden" value="" aria-hidden="true" required placeholder="nama@email.com"></span></div>
 <div><label>Password sementara</label><input id="newUserPassword" type="password" minlength="6" required placeholder="Minimal 6 karakter"></div>
 <div><label>Role</label><select id="newUserRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
+<div><label>Hubungkan ke Anggota</label>
+<select id="newUserMemberId"><option value="">-- Tidak dikaitkan --</option></select>
+</div>
 <div class="actions" style="align-items:end"><button class="btn primary" type="submit">+ Buat Pengguna</button></div>
 </form><div class="notice">Email akun dibuat otomatis oleh sistem. Admin cukup mengisi username, password, dan role.</div><div id="userMsg" class="notice"></div></div>
+<div class="panel"><h3>🔗 Pengaitan Akun dengan Anggota</h3>
+<div class="notice">Akun User harus dikaitkan dengan nama anggota agar Monitoring Iuran menampilkan orang yang benar.</div>
+<div class="toolbar">
+<select id="mapUserId"><option value="">-- Pilih User --</option></select>
+<select id="mapMemberId"><option value="">-- Pilih Anggota --</option></select>
+<button class="btn primary" type="button" onclick="saveUserMemberMap()">Simpan Pengaitan</button>
+</div>
+<div id="mapMsg" class="notice"></div>
+</div>
 <div class="panel"><div class="toolbar"><input id="userSearch" placeholder="Cari nama pengguna / email..."><button class="btn secondary" onclick="loadUsers()">↻ Refresh</button></div>
 <div class="tablewrap"><table style="min-width:780px"><thead><tr><th>Nama Pengguna</th><th>Email</th><th>Role</th><th>Status</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="userTable"></tbody></table></div></div>
 </section>
@@ -160,6 +173,30 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  </div>
 </section>
 
+
+<section id="dues-monitor" class="view">
+  <div class="panel">
+    <h2>Monitoring Iuran</h2>
+    <p class="muted">Rekap pembayaran iuran per bulan. Admin dapat melihat seluruh anggota; User hanya melihat status dirinya.</p>
+    <div class="toolbar">
+      <label>Bulan <input id="duesMonth" type="month"></label>
+      <button class="btn secondary" onclick="loadDuesMonitor()">🔄 Refresh</button>
+      <button class="btn secondary" onclick="exportDuesCSV()">📥 Export CSV</button>
+    </div>
+    <div class="cards" id="duesCards">
+      <div class="card"><div class="label">Total Iuran</div><div class="value" id="duesTotal">Rp0</div></div>
+      <div class="card"><div class="label">Sudah Bayar</div><div class="value" id="duesPaid">0</div></div>
+      <div class="card"><div class="label">Belum Bayar</div><div class="value" id="duesUnpaid">0</div></div>
+      <div class="card"><div class="label">Persentase</div><div class="value" id="duesPercent">0%</div></div>
+    </div>
+    <div class="table-wrap">
+      <table id="duesMonitorTable">
+        <thead><tr><th>Anggota</th><th>Status</th><th>Nominal</th><th>Tanggal Bayar</th></tr></thead>
+        <tbody><tr><td colspan="4">Pilih bulan untuk melihat data.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
 <section id="audit" class="view">
 <div class="panel">
 <h2>Audit Log</h2>
@@ -258,7 +295,7 @@ async function loadUsers(){
 async function changeUserRole(id,role){if(!confirm('Ubah role menjadi '+role+'?'))return;try{await adminApi('set_role',{user_id:id,role});await loadUsers()}catch(e){alert(e.message)}}
 async function toggleUser(id,disabled){if(!confirm(disabled?'Nonaktifkan pengguna ini?':'Aktifkan pengguna ini?'))return;try{await adminApi('set_disabled',{user_id:id,disabled});await loadUsers()}catch(e){alert(e.message)}}
 async function deleteUser(id){if(!confirm('Hapus akun ini? Tindakan tidak dapat dibatalkan.'))return;try{await adminApi('delete',{user_id:id});await loadUsers()}catch(e){alert(e.message)}}
-$('userForm').onsubmit=async e=>{e.preventDefault();try{$('userMsg').textContent='Membuat pengguna...';await adminApi('create',{username:$('newUserUsername').value.trim(),password:$('newUserPassword').value,role:$('newUserRole').value});$('userForm').reset();$('userMsg').textContent='Pengguna berhasil dibuat.';await loadUsers()}catch(err){$('userMsg').textContent='Gagal: '+err.message}};
+$('userForm').onsubmit=async e=>{e.preventDefault();try{$('userMsg').textContent='Membuat pengguna...';await adminApi('create',{username:$('newUserUsername').value.trim(),password:$('newUserPassword').value,role:$('newUserRole').value,member_id:$('newUserMemberId')?.value?Number($('newUserMemberId').value):null});$('userForm').reset();$('userMsg').textContent='Pengguna berhasil dibuat.';await loadUsers()}catch(err){$('userMsg').textContent='Gagal: '+err.message}};
 $('userSearch').oninput=loadUsers;
 async function connect(){
  const url=$('url').value.trim().replace(/\/$/,''), key=$('key').value.trim();
@@ -601,7 +638,7 @@ async function delPayment(id){
     await load();
   }catch(err){alert(err.message)}
 }
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if((b.dataset.v==='users'||b.dataset.v==='settings'||b.dataset.v==='audit')&&currentRole!=='admin')return;document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(b.dataset.v).classList.add('active');if(b.dataset.v==='users')loadUsers();if(b.dataset.v==='reports')renderReport();if(b.dataset.v==='activities')loadActivities();if(b.dataset.v==='audit')loadAuditLogs()});
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if((b.dataset.v==='users'||b.dataset.v==='settings'||b.dataset.v==='audit')&&currentRole!=='admin')return;document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(b.dataset.v).classList.add('active');if(b.dataset.v==='users'){loadUsers();loadUserMemberMapping()}if(b.dataset.v==='reports')renderReport();if(b.dataset.v==='activities')loadActivities();if(b.dataset.v==='dues-monitor'){setDefaultDuesMonth();loadDuesMonitor()}if(b.dataset.v==='audit')loadAuditLogs()});
 $('q').oninput=renderTx;$('mo').oninput=renderTx;$('yearFilter').onchange=render;$('monthFilter').onchange=render;['rpYear','rpMonth','rpCat'].forEach(id=>$(id).onchange=renderReport);$('rpQ').oninput=renderReport;
 $('url').value=localStorage.getItem('supabase_url')||'';$('key').value=localStorage.getItem('supabase_key')||'';$('date').value=new Date().toISOString().slice(0,10);$('actDate').value=new Date().toISOString().slice(0,10);
 $('loginForm').onsubmit=e=>{e.preventDefault();login()};$('logoutBtn').onclick=logout;
@@ -771,6 +808,115 @@ function exportReportCSV(){
   a.download='Laporan_Uang_Kas.csv';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+
+// V12 — Monitoring Iuran
+function monthNow(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+function setDefaultDuesMonth(){
+  const el=$('duesMonth');
+  if(el && !el.value) el.value=monthNow();
+}
+function nextMonth(ym){
+  const [y,m]=ym.split('-').map(Number);
+  const d=new Date(y,m,1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+}
+async function loadDuesMonitor(){
+  const month=$('duesMonth')?.value;
+  if(!month)return;
+  try{
+    const [members,pays]=await Promise.all([
+      rest('members?select=id,name&order=name.asc'),
+      rest('member_payments?select=member_id,payment_month,amount,created_at&payment_month=gte.'+encodeURIComponent(month+'-01')+'&payment_month=lt.'+encodeURIComponent(nextMonth(month)))
+    ]);
+    const paidMap={};
+    (pays||[]).forEach(p=>paidMap[p.member_id]=p);
+
+    let visible=members||[];
+    if(currentRole!=='admin'){
+      const prof=await rest('profiles?id=eq.'+encodeURIComponent(currentUser.id)+'&select=member_id')||[];
+      const memberId=prof[0]?.member_id;
+      visible=memberId ? visible.filter(m=>String(m.id)===String(memberId)) : [];
+    }
+
+    const tb=document.querySelector('#duesMonitorTable tbody');
+    if(!tb)return;
+    let paid=0,total=0;
+    visible.forEach(m=>{if(paidMap[m.id]){paid++;total+=Number(paidMap[m.id].amount||0)}});
+    const unpaid=Math.max(visible.length-paid,0);
+    $('duesTotal').textContent=rp(total);
+    $('duesPaid').textContent=paid;
+    $('duesUnpaid').textContent=unpaid;
+    $('duesPercent').textContent=(visible.length?((paid/visible.length)*100).toFixed(1):'0')+'%';
+    tb.innerHTML=visible.length?visible.map(m=>{
+      const p=paidMap[m.id];
+      return `<tr><td>${esc(m.name||'-')}</td><td>${p?'✅ Sudah Bayar':'❌ Belum Bayar'}</td><td>${p?rp(p.amount):'-'}</td><td>${p&&p.created_at?new Date(p.created_at).toLocaleDateString('id-ID'):'-'}</td></tr>`;
+    }).join(''):'<tr><td colspan="4">'+(currentRole==='admin'?'Belum ada anggota.':'Akun User belum dikaitkan dengan anggota oleh Admin.')+'</td></tr>';
+  }catch(e){
+    console.error(e);
+    const tb=document.querySelector('#duesMonitorTable tbody');
+    if(tb)tb.innerHTML='<tr><td colspan="4">Gagal memuat monitoring iuran: '+esc(e.message)+'</td></tr>';
+  }
+}
+function exportDuesCSV(){
+  const rows=[['Anggota','Status','Nominal','Tanggal Bayar']];
+  document.querySelectorAll('#duesMonitorTable tbody tr').forEach(tr=>{
+    const vals=[...tr.children].map(td=>td.textContent.trim());
+    if(vals.length===4)rows.push(vals);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download='Monitoring_Iuran_'+(($('duesMonth')?.value)||monthNow())+'.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.tab[data-v="dues-monitor"]');
+  if(b){setDefaultDuesMonth();setTimeout(loadDuesMonitor,100);}
+});
+document.addEventListener('DOMContentLoaded',()=>{setDefaultDuesMonth();});
+
+
+async function loadUserMemberMapping(){
+  if(currentRole!=='admin')return;
+  try{
+    const [ud,ms]=await Promise.all([
+      adminApi('list'),
+      rest('members?select=id,name&order=name.asc')
+    ]);
+    const users=(ud.users||[]).filter(u=>u.role==='user');
+    const us=$('mapUserId'), msEl=$('mapMemberId'), createSel=$('newUserMemberId');
+    const userOpts='<option value="">-- Pilih User --</option>'+users.map(u=>`<option value="${u.id}">${esc(u.username||u.email||u.id)}</option>`).join('');
+    const memberOpts='<option value="">-- Pilih Anggota --</option>'+(ms||[]).map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+    if(us)us.innerHTML=userOpts;
+    if(msEl)msEl.innerHTML=memberOpts;
+    if(createSel)createSel.innerHTML='<option value="">-- Tidak dikaitkan --</option>'+(ms||[]).map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+    if(us)us.onchange=()=>{
+      const u=users.find(x=>String(x.id)===String(us.value));
+      if(msEl)msEl.value=u?.member_id?String(u.member_id):'';
+    };
+  }catch(e){
+    console.warn('Mapping:',e);
+    const msg=$('mapMsg'); if(msg)msg.textContent='Gagal memuat User/Anggota: '+e.message;
+    const us=$('mapUserId'), msEl=$('mapMemberId');
+    if(us)us.innerHTML='<option value="">Gagal memuat User</option>';
+    if(msEl)msEl.innerHTML='<option value="">Gagal memuat Anggota</option>';
+  }
+}
+async function saveUserMemberMap(){
+  const user_id=$('mapUserId')?.value, member_id=$('mapMemberId')?.value;
+  if(!user_id||!member_id){$('mapMsg').textContent='Pilih User dan Anggota terlebih dahulu.';return;}
+  try{
+    $('mapMsg').textContent='Menyimpan...';
+    await adminApi('set_member',{user_id,member_id:Number(member_id)});
+    $('mapMsg').textContent='Pengaitan berhasil disimpan.';
+    await loadUsers();
+  }catch(e){$('mapMsg').textContent='Gagal: '+e.message;}
 }
 
 </script></body></html>
