@@ -152,7 +152,10 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
   </form>
  </div>
  <div class="panel"><h3>Daftar Dokumentasi</h3>
-  <div class="toolbar"><input id="actSearch" placeholder="Cari kegiatan..."><button class="btn secondary" onclick="loadActivities()">↻ Refresh</button></div>
+  <div class="toolbar"><input id="actSearch" placeholder="Cari kegiatan..."><button class="btn secondary" onclick="loadActivities()">↻ Refresh</button>
+<button class="btn secondary" onclick="printReport()">🖨️ Cetak / PDF</button>
+<button class="btn secondary" onclick="exportReportCSV()">📥 Export CSV</button>
+</div>
   <div class="tablewrap"><table style="min-width:760px"><thead><tr><th>Tanggal</th><th>Kegiatan</th><th>Keterangan</th><th>Foto</th><th></th></tr></thead><tbody id="activityRows"></tbody></table></div>
  </div>
 </section>
@@ -744,5 +747,30 @@ document.addEventListener('click',e=>{
  const b=e.target.closest('.tab[data-v="audit"]');
  if(b && currentRole==='admin') setTimeout(loadAuditLogs,100);
 });
+
+
+// V11 — Cetak/PDF dan Export CSV untuk Laporan
+function printReport(){
+  if(typeof renderReport==='function') renderReport();
+  setTimeout(()=>window.print(),200);
+}
+
+function exportReportCSV(){
+  const rows=[];
+  const table=document.querySelector('#reports table');
+  if(!table){ alert('Tabel laporan belum tersedia.'); return; }
+  table.querySelectorAll('tr').forEach(tr=>{
+    const vals=[...tr.querySelectorAll('th,td')].map(x=>x.innerText.trim());
+    if(vals.length) rows.push(vals);
+  });
+  if(!rows.length){ alert('Tidak ada data laporan.'); return; }
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='Laporan_Uang_Kas.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
 
 </script></body></html>
