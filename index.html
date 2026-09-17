@@ -70,7 +70,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  </div>
 </div>
 <div id="appShell" style="display:none">
-<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V8.3</div><div class="sub">Database Supabase • Online</div></div>
+<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V8.4</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
 <nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings">Koneksi</button></nav></header>
 <main>
@@ -122,7 +122,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  <div id="rpPrintMeta" style="font-size:10.5px;margin-top:4px"></div>
 </div>
 <div class="panel noprint" style="margin-top:0"><h3 style="margin-top:0">Laporan Kas</h3>
-<div class="notice" style="margin-top:0">Semua angka dihitung langsung dari data Supabase (transaksi dan iuran anggota) sesuai filter di bawah.</div>
+<div class="notice" style="margin-top:0">Semua angka dihitung langsung dari data Supabase (transaksi dan iuran anggota) sesuai filter di bawah.</div><div class="notice" style="margin-top:8px">Rekap iuran pada laporan ditampilkan sebagai total per bulan, bukan per nama anggota. Data per anggota tetap tersimpan di menu Iuran Anggota.</div>
 <div class="toolbar" style="margin-top:12px">
  <select id="rpYear" title="Tahun"></select>
  <select id="rpMonth" title="Bulan"><option value="">Semua Bulan</option><option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option><option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option></select>
@@ -137,8 +137,8 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 </div>
 </div>
 <div class="panel"><div class="rphead" id="rpInfo"></div><div class="grid grid6" id="rpSummary"></div></div>
-<div class="panel"><h3>Rincian Laporan</h3><div class="tablewrap"><table style="min-width:900px"><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kas Masuk</th><th>Iuran</th><th>Kas Keluar</th><th>Saldo</th><th>Kategori</th><th>PIC</th></tr></thead><tbody id="rpRows"></tbody><tfoot id="rpFoot"></tfoot></table></div></div>
-<div class="panel"><h3 id="rpDuesTitle">Rekap Iuran Anggota</h3><div class="tablewrap"><table style="min-width:760px"><thead><tr><th>Nama Anggota</th><th>September</th><th>Oktober</th><th>November</th><th>Desember</th><th>Total</th><th>Status</th></tr></thead><tbody id="rpDues"></tbody></table></div></div>
+<div class="panel"><h3>Rincian Laporan</h3><div class="notice" style="margin-bottom:8px">Iuran anggota digabung ke Kas Masuk dan ditampilkan sebagai total iuran per bulan.</div><div class="tablewrap"><table style="min-width:820px"><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kas Masuk</th><th>Kas Keluar</th><th>Saldo</th><th>Kategori</th><th>PIC</th></tr></thead><tbody id="rpRows"></tbody><tfoot id="rpFoot"></tfoot></table></div></div>
+<div class="panel"><h3 id="rpDuesTitle">Total Iuran Anggota per Bulan</h3><div class="tablewrap"><table style="min-width:520px"><thead><tr><th>Bulan</th><th>Total Iuran</th></tr></thead><tbody id="rpDues"></tbody><tfoot id="rpDuesFoot"></tfoot></table></div></div>
 <div class="panel"><h3 id="rpChartTitle">Grafik Kas Masuk vs Kas Keluar per Bulan</h3><div id="rpChartIO"></div><div id="rpChartBal"></div></div>
 </section>
 <section id="settings" class="view"><div class="panel"><h3>Koneksi Supabase</h3>
@@ -378,39 +378,57 @@ function renderReport(){
  if(!$('rpSummary'))return;
  populateReportFilters();
  const R=computeReport(), f=R.f;
+  const baseRows=R.detail.filter(r=>r.cat!=='Iuran Anggota');
+  const duesGroups={};
+  R.detail.filter(r=>r.cat==='Iuran Anggota').forEach(r=>{
+    const k=(r.date||'').slice(0,7);
+    if(!duesGroups[k]) duesGroups[k]={date:r.date,amount:0,saldo:r.saldo};
+    duesGroups[k].amount += Number(r.dues||0);
+    duesGroups[k].date = r.date;
+    duesGroups[k].saldo = r.saldo;
+  });
  const cards=[['Saldo Awal',R.openingBal,''],['Total Kas Masuk',R.cashIn,'green'],['Total Iuran Anggota',R.dues,'green'],
   ['Total Kas Masuk Lain',R.otherIn,'green'],['Total Kas Keluar',R.cashOut,'red'],['Saldo Akhir',R.closingBal,R.closingBal<0?'red':'']];
  $('rpSummary').innerHTML=cards.map(c=>`<div class="card"><div class="label">${c[0]}</div><div class="value ${c[2]}">${rp(c[1])}</div></div>`).join('');
- const info=`Periode: <b>${esc(rpPeriodLabel(f))}</b> &bull; Kategori: <b>${esc(f.cat||'Semua')}</b> &bull; Pencarian: <b>${esc($('rpQ').value.trim()||'-')}</b> &bull; ${R.detail.length} baris`;
+ const info=`Periode: <b>${esc(rpPeriodLabel(f))}</b> &bull; Kategori: <b>${esc(f.cat||'Semua')}</b> &bull; Pencarian: <b>${esc($('rpQ').value.trim()||'-')}</b> &bull; ${baseRows.length + Object.keys(duesGroups).length} baris`;
  $('rpInfo').innerHTML=info;
  $('rpPrintMeta').innerHTML=info+` &bull; Dicetak: ${new Date().toLocaleString('id-ID')}`;
 
- $('rpRows').innerHTML=R.detail.map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.desc)}</td><td class="green">${r.cin?rp(r.cin):'-'}</td><td class="green">${r.dues?rp(r.dues):'-'}</td><td class="red">${r.cout?rp(r.cout):'-'}</td><td>${rp(r.saldo)}</td><td>${esc(r.cat)}</td><td>${esc(r.pic)}</td></tr>`).join('')
-  ||'<tr><td colspan="8">Tidak ada data untuk filter ini.</td></tr>';
- $('rpFoot').innerHTML=R.detail.length?`<tr><th colspan="2">Total</th><th class="green">${rp(R.otherIn)}</th><th class="green">${rp(R.dues)}</th><th class="red">${rp(R.cashOut)}</th><th>${rp(R.closingBal)}</th><th colspan="2"></th></tr>`:'';
+ const combined=baseRows.map(r=>({type:'base',r}))
+   .concat(Object.values(duesGroups).map(r=>({type:'dues',r})))
+   .sort((a,b)=>{
+     const da=a.r.date||'', db=b.r.date||'';
+     if(da!==db) return da.localeCompare(db);
+     return a.type==='base' ? -1 : 1;
+   });
+ $('rpRows').innerHTML=combined.map(x=>{
+   if(x.type==='dues'){
+     const r=x.r;
+     return `<tr><td>${esc(r.date)}</td><td><b>Iuran Anggota — ${esc(rpMonthName(r.date))}</b></td><td class="green"><b>${rp(r.amount)}</b></td><td class="red">-</td><td>${rp(r.saldo)}</td><td>Iuran Anggota</td><td>-</td></tr>`;
+   }
+   const r=x.r;
+   return `<tr><td>${esc(r.date)}</td><td>${esc(r.desc)}</td><td class="green">${r.cin?rp(r.cin):'-'}</td><td class="red">${r.cout?rp(r.cout):'-'}</td><td>${rp(r.saldo)}</td><td>${esc(r.cat)}</td><td>${esc(r.pic)}</td></tr>`;
+ }).join('') || '<tr><td colspan="7">Tidak ada data untuk filter ini.</td></tr>';
+ $('rpFoot').innerHTML=R.detail.length?`<tr><th colspan="2">Total</th><th class="green">${rp(R.cashIn)}</th><th class="red">${rp(R.cashOut)}</th><th>${rp(R.closingBal)}</th><th colspan="2"></th></tr>`:'';
 
  renderReportDues(R);
  renderReportCharts(R);
 }
-/* Rekap iuran September–Desember: Sudah bila pembayaran ditemukan. */
+/* Rekap iuran: total seluruh pembayaran per bulan, tanpa rincian nama anggota. */
 function reportDuesRecap(R){
- const y=R.chartYear, months=['09','10','11','12'], q=R.f.q;
- return members
-  .filter(m=>!q||String(m.name||'').toLowerCase().includes(q))
-  .map(m=>{
-   const vals=months.map(mm=>payments.filter(p=>p.member_id===m.id&&(p.payment_month||'').startsWith(y+'-'+mm))
-     .reduce((t,p)=>t+(+p.amount||0),0));
-   const total=vals.reduce((a,b)=>a+b,0);
-   return {name:m.name||'',vals,total,paidCount:vals.filter(v=>v>0).length,status:total>0?'Sudah':'Belum'};
-  });
+ const y=R.chartYear;
+ return RP_MS.map((mm,i)=>{
+  const total=payments.filter(p=>(p.payment_month||'').startsWith(y+'-'+mm))
+   .reduce((t,p)=>t+(+p.amount||0),0);
+  return {month:mm,name:RP_MONTHS[i],total};
+ });
 }
 function renderReportDues(R){
  const rows=reportDuesRecap(R);
- $('rpDuesTitle').textContent='Rekap Iuran Anggota September–Desember '+R.chartYear;
- $('rpDues').innerHTML=rows.map(r=>`<tr><td><b>${esc(r.name)}</b></td>`+
-  r.vals.map(v=>`<td>${v?`<span class="status ok">Sudah</span><br><small>${rp(v)}</small>`:'<span class="status err">Belum</span>'}</td>`).join('')+
-  `<td><b>${rp(r.total)}</b></td><td>${r.total>0?`<span class="status ok">Sudah</span><br><small>${r.paidCount} dari 4 bulan</small>`:'<span class="status err">Belum</span>'}</td></tr>`).join('')
-  ||'<tr><td colspan="7">Belum ada anggota.</td></tr>';
+ $('rpDuesTitle').textContent='Total Iuran Anggota per Bulan '+R.chartYear;
+ $('rpDues').innerHTML=rows.map(r=>`<tr><td><b>${r.name}</b></td><td class="green"><b>${rp(r.total)}</b></td></tr>`).join('');
+ const total=rows.reduce((s,r)=>s+r.total,0);
+ $('rpDuesFoot').innerHTML=`<tr><th>Total</th><th class="green">${rp(total)}</th></tr>`;
 }
 function renderReportCharts(R){
  const y=R.chartYear, rows=reportRows().filter(r=>rpMatch(r,R.f));
@@ -453,9 +471,9 @@ function exportReportCSV(){
   ['Total Kas Masuk Lain',R.otherIn],['Total Kas Keluar',R.cashOut],['Saldo Akhir',R.closingBal],[],
   ['RINCIAN LAPORAN'],['Tanggal','Keterangan','Kas Masuk','Iuran','Kas Keluar','Saldo','Kategori','PIC']];
  R.detail.forEach(r=>rows.push([r.date,r.desc,r.cin,r.dues,r.cout,r.saldo,r.cat,r.pic]));
- rows.push([],['REKAP IURAN ANGGOTA September–Desember '+R.chartYear],
-  ['Nama Anggota','September','Oktober','November','Desember','Total','Status']);
- reportDuesRecap(R).forEach(r=>rows.push([r.name,...r.vals,r.total,r.status]));
+ rows.push([],['TOTAL IURAN ANGGOTA PER BULAN '+R.chartYear],
+  ['Bulan','Total Iuran']);
+ reportDuesRecap(R).forEach(r=>rows.push([r.name,r.total]));
  const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
  const a=document.createElement('a');
