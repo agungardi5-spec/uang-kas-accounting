@@ -60,14 +60,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
    <div class="full actions"><button class="btn primary" type="submit">🔐 Login</button></div>
   </form>
   <div class="notice">Login menggunakan Nama Pengguna + Password. Email tetap tersimpan di Supabase sebagai identitas akun.</div>
-  <div style="margin-top:14px;text-align:left"><button type="button" class="btn secondary" onclick="toggleLoginConnection()">⚙️ Atur Koneksi Supabase</button>
-   <div id="loginConnPanel" class="panel" style="display:none;margin-top:10px;background:#f8fafc">
-    <label>Project URL</label><input id="loginUrl" placeholder="https://xxxx.supabase.co">
-    <br><br><label>Publishable Key</label><input id="loginKey" type="password" placeholder="sb_publishable_...">
-    <br><br><button type="button" class="btn primary" onclick="saveLoginConnection()">Simpan Koneksi</button>
-    <div id="loginConnMsg" class="notice"></div>
-   </div>
-  </div><div id="loginMsg" class="notice"></div>
+<div id="loginMsg" class="notice"></div>
  </div>
 </div>
 <div id="appShell" style="display:none">
@@ -149,7 +142,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 </main>
 </div>
 <script>
-let sb=null, supaUrl='', supaKey='', accessToken='', currentUser=null, currentRole='user', currentUsername='', members=[], transactions=[], payments=[], opening=0;
+let sb=null, supaUrl='https://htbvztienatubzvzodpz.supabase.co', supaKey='sb_publishable_lhb8WdD1vOBtGjWrqcHMOw_RdGe2uN6', accessToken='', currentUser=null, currentRole='user', currentUsername='', members=[], transactions=[], payments=[], opening=0;
 const rp=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(+n||0);
 const $=id=>document.getElementById(id);
 function setStatus(t,ok=false){$('status').textContent=t;$('status').className='status '+(ok?'ok':'err')}
@@ -500,8 +493,10 @@ document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if(b.dataset.v==
 $('q').oninput=renderTx;$('mo').oninput=renderTx;$('yearFilter').onchange=render;$('monthFilter').onchange=render;['rpYear','rpMonth','rpCat'].forEach(id=>$(id).onchange=renderReport);$('rpQ').oninput=renderReport;
 $('url').value=localStorage.getItem('supabase_url')||'';$('key').value=localStorage.getItem('supabase_key')||'';$('date').value=new Date().toISOString().slice(0,10);
 $('loginForm').onsubmit=e=>{e.preventDefault();login()};$('logoutBtn').onclick=logout;
-const su=localStorage.getItem('supabase_url'),sk=localStorage.getItem('supabase_key'),ss=localStorage.getItem('supabase_session');
-if(su&&sk){supaUrl=su;supaKey=sk}
+const ss=localStorage.getItem('supabase_session');
+// V8.9: koneksi Supabase tertanam di aplikasi, sehingga komputer/perangkat baru langsung siap login.
+localStorage.setItem('supabase_url',supaUrl);
+localStorage.setItem('supabase_key',supaKey);
 if(ss&&supaUrl&&supaKey){
  try{
   const x=JSON.parse(ss);accessToken=x.access_token;currentUser=x.user;
