@@ -1,9 +1,8 @@
-
 <!doctype html>
 <html lang="id">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uang Kas Accounting 2026</title>
+<title>Uang Kas Accounting 2026 V9.0</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;background:#f4f7fb;color:#172033}
 header{background:#0f172a;color:white;padding:16px 20px;position:sticky;top:0;z-index:5}.head{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;font-size:20px}.sub{font-size:12px;opacity:.7}
@@ -64,9 +63,9 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  </div>
 </div>
 <div id="appShell" style="display:none">
-<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V8.6</div><div class="sub">Database Supabase • Online</div></div>
+<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V9.0</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
-<nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings" data-admin-only>Koneksi</button></nav></header>
+<nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="activities">Kegiatan</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings" data-admin-only>Koneksi</button></nav></header>
 <main>
 <section id="dashboard" class="view active"><div class="panel" style="margin-top:0;margin-bottom:14px"><b>Dashboard Kas Terintegrasi</b><div class="notice">Iuran anggota otomatis dihitung sebagai kas masuk pada saldo akhir.</div></div><div class="grid">
 <div class="card"><div class="label">Saldo Awal</div><div id="opening" class="value">Rp0</div></div>
@@ -90,9 +89,9 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 
 <section id="transactions" class="view"><div class="panel"><h3>Tambah Transaksi</h3>
 <form id="txForm"><div><label>Tanggal</label><input id="date" type="date" required></div><div><label>Kategori</label><input id="cat"></div>
-<div class="full"><label>Keterangan</label><input id="desc" required></div><div><label>Kas Masuk</label><input id="cin" type="number" min="0" value="0"></div><div><label>Kas Keluar</label><input id="cout" type="number" min="0" value="0"></div><div><label>PIC</label><input id="pic"></div>
+<div class="full"><label>Keterangan</label><input id="desc" required></div><div class="full"><label>Foto Bill / Bukti Transaksi</label><input id="billPhoto" type="file" accept="image/*" capture="environment"><div class="notice">Opsional. Foto disimpan di Supabase Storage dan dapat dilihat dari perangkat lain.</div></div><div><label>Kas Masuk</label><input id="cin" type="number" min="0" value="0"></div><div><label>Kas Keluar</label><input id="cout" type="number" min="0" value="0"></div><div><label>PIC</label><input id="pic"></div>
 <div class="full actions"><button class="btn secondary" type="reset">Reset</button><button class="btn primary">+ Simpan</button></div></form></div>
-<div class="panel" id="editPanel" style="display:none"><h3>Edit Transaksi</h3><form id="editForm"><input type="hidden" id="editId"><div><label>Tanggal</label><input id="editDate" type="date" required></div><div><label>Kategori</label><input id="editCat"></div><div class="full"><label>Keterangan</label><input id="editDesc" required></div><div><label>Kas Masuk</label><input id="editIn" type="number" min="0"></div><div><label>Kas Keluar</label><input id="editOut" type="number" min="0"></div><div><label>PIC</label><input id="editPic"></div><div class="full actions"><button type="button" class="btn secondary" onclick="cancelEdit()">Batal</button><button class="btn primary">Simpan Perubahan</button></div></form></div><div class="panel"><h3>Data Transaksi</h3><div class="toolbar"><input id="q" placeholder="Cari..."><input id="mo" type="month"><button class="btn secondary" onclick="load()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Masuk</th><th>Keluar</th><th>Saldo</th><th>Kategori</th><th>PIC</th><th></th></tr></thead><tbody id="tx"></tbody></table></div></div></section>
+<div class="panel" id="editPanel" style="display:none"><h3>Edit Transaksi</h3><form id="editForm"><input type="hidden" id="editId"><div><label>Tanggal</label><input id="editDate" type="date" required></div><div><label>Kategori</label><input id="editCat"></div><div class="full"><label>Keterangan</label><input id="editDesc" required></div><div class="full"><label>Ganti Foto Bill / Bukti</label><input id="editBillPhoto" type="file" accept="image/*" capture="environment"><div id="editBillInfo" class="notice"></div></div><div><label>Kas Masuk</label><input id="editIn" type="number" min="0"></div><div><label>Kas Keluar</label><input id="editOut" type="number" min="0"></div><div><label>PIC</label><input id="editPic"></div><div class="full actions"><button type="button" class="btn secondary" onclick="cancelEdit()">Batal</button><button class="btn primary">Simpan Perubahan</button></div></form></div><div class="panel"><h3>Data Transaksi</h3><div class="toolbar"><input id="q" placeholder="Cari..."><input id="mo" type="month"><button class="btn secondary" onclick="load()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Masuk</th><th>Keluar</th><th>Saldo</th><th>Kategori</th><th>PIC</th><th>Bill</th><th></th></tr></thead><tbody id="tx"></tbody></table></div></div></section>
 
 <section id="members" class="view"><div class="panel"><h3>Anggota</h3><div class="toolbar"><input id="newName" placeholder="Nama anggota"><button data-admin-only class="btn primary" onclick="addMember()">+ Tambah</button></div>
 <div class="toolbar"><select id="m"></select><input id="pm" type="month" value="2026-09"><input id="pa" type="number" value="20000" min="0"><button class="btn primary" onclick="pay()">Simpan Iuran</button></div><div class="notice">Klik Simpan Iuran untuk mengubah status anggota pada bulan yang dipilih. Tabel menampilkan status September–Desember 2026.</div>
@@ -135,6 +134,23 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div class="panel"><h3 id="rpDuesTitle">Total Iuran Anggota per Bulan</h3><div class="tablewrap"><table style="min-width:520px"><thead><tr><th>Bulan</th><th>Total Iuran</th></tr></thead><tbody id="rpDues"></tbody><tfoot id="rpDuesFoot"></tfoot></table></div></div>
 
 </section>
+
+<section id="activities" class="view">
+ <div class="panel"><h3>📸 Dokumentasi Kegiatan</h3><div class="notice">Fitur ini membutuhkan setup Supabase Storage & tabel kegiatan satu kali.</div>
+  <form id="activityForm">
+   <div><label>Tanggal</label><input id="actDate" type="date" required></div>
+   <div><label>Nama Kegiatan</label><input id="actName" required placeholder="Contoh: Rapat Accounting"></div>
+   <div class="full"><label>Keterangan</label><input id="actDesc" placeholder="Keterangan kegiatan"></div>
+   <div class="full"><label>Foto Kegiatan</label><input id="actPhoto" type="file" accept="image/*" capture="environment" required><div class="notice">Foto akan tersimpan di Supabase Storage.</div></div>
+   <div class="full actions"><button class="btn secondary" type="reset">Reset</button><button class="btn primary" type="submit">+ Simpan Kegiatan</button></div>
+  </form>
+ </div>
+ <div class="panel"><h3>Daftar Dokumentasi</h3>
+  <div class="toolbar"><input id="actSearch" placeholder="Cari kegiatan..."><button class="btn secondary" onclick="loadActivities()">↻ Refresh</button></div>
+  <div class="tablewrap"><table style="min-width:760px"><thead><tr><th>Tanggal</th><th>Kegiatan</th><th>Keterangan</th><th>Foto</th><th></th></tr></thead><tbody id="activityRows"></tbody></table></div>
+ </div>
+</section>
+
 <section id="settings" class="view"><div class="panel"><h3>Koneksi Supabase</h3>
 <p class="notice">Masukkan <b>Project URL</b> dan <b>Publishable key</b> dari tombol Connect di Supabase. Setelah tersimpan, pengguna harus login dengan akun Supabase Auth. Nilai disimpan hanya di browser ini. Jika tombol tidak merespons, gunakan versi terbaru ini karena tidak bergantung pada library eksternal.</p>
 <label>Project URL</label><input id="url" placeholder="https://xxxx.supabase.co"><br><br><label>Publishable Key</label><input id="key" type="password" placeholder="sb_publishable_..."><br><br>
@@ -166,6 +182,49 @@ async function authRequest(path, body, method='POST', token=null){
  if(!r.ok) throw new Error(data?.msg||data?.message||data?.error_description||data||('Auth HTTP '+r.status));
  return data;
 }
+
+async function storageUpload(bucket,path,file){
+  if(!file)return null;
+  if(!file.type.startsWith('image/')) throw new Error('File harus berupa gambar.');
+  if(file.size>5*1024*1024) throw new Error('Ukuran foto maksimal 5 MB.');
+  const r=await fetch(supaUrl+'/storage/v1/object/'+bucket+'/'+path,{
+    method:'POST',
+    headers:{apikey:supaKey,Authorization:'Bearer '+accessToken,'Content-Type':file.type||'application/octet-stream','x-upsert':'true'},
+    body:file
+  });
+  const t=await r.text(); let d={}; try{d=t?JSON.parse(t):{}}catch(_){}
+  if(!r.ok) throw new Error(d.message||d.error||t||('Upload gagal HTTP '+r.status));
+  return path;
+}
+async function storageDelete(bucket,path){
+  if(!path)return;
+  const r=await fetch(supaUrl+'/storage/v1/object/'+bucket,{
+    method:'DELETE',
+    headers:{apikey:supaKey,Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
+    body:JSON.stringify({prefixes:[path]})
+  });
+  if(!r.ok){const t=await r.text();throw new Error(t||'Gagal menghapus foto.');}
+}
+async function signedPhotoUrl(bucket,path){
+  if(!path)return null;
+  const r=await fetch(supaUrl+'/storage/v1/object/sign/'+bucket+'/'+path,{
+    method:'POST',
+    headers:{apikey:supaKey,Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
+    body:JSON.stringify({expiresIn:3600})
+  });
+  const t=await r.text(); let d={}; try{d=t?JSON.parse(t):{}}catch(_){}
+  if(!r.ok) throw new Error(d.message||d.error||t||('Gagal membuat link foto HTTP '+r.status));
+  return supaUrl+'/storage/v1'+(d.signedURL||d.signedUrl||d.path||'');
+}
+function escAttr(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+async function viewBill(path){
+  try{const u=await signedPhotoUrl('bill-photos',path);if(u)window.open(u,'_blank','noopener');}catch(e){alert(e.message)}
+}
+async function viewActivityPhoto(path){
+  try{const u=await signedPhotoUrl('activity-photos',path);if(u)window.open(u,'_blank','noopener');}catch(e){alert(e.message)}
+}
+function fileExt(file){return (file?.name?.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg'}
+
 async function adminApi(action,payload={}){
  const r=await fetch(supaUrl+'/functions/v1/admin-users',{method:'POST',headers:{'Content-Type':'application/json',apikey:supaKey,Authorization:'Bearer '+accessToken},body:JSON.stringify({action,...payload})});
  const t=await r.text();let d;try{d=t?JSON.parse(t):{}}catch(_){d={error:t}}
@@ -291,7 +350,7 @@ function render(){
 function renderTx(){let q=($('q').value||'').toLowerCase(),mo=$('mo').value||'',bal=opening;
  const arr=[...transactions].sort((a,b)=>(a.transaction_date||'').localeCompare(b.transaction_date||'')||a.id-b.id);
  const duesByDate={}; payments.forEach(p=>{const d=p.payment_month||'';duesByDate[d]=(duesByDate[d]||0)+(+p.amount||0)});
- $('tx').innerHTML=arr.filter(x=>(!q||[x.description,x.category,x.pic].join(' ').toLowerCase().includes(q))&&(!mo||(x.transaction_date||'').startsWith(mo))).map(x=>{bal+=(+x.cash_in||0)-(+x.cash_out||0);return `<tr><td>${x.transaction_date}</td><td>${esc(x.description)}</td><td class="green">${x.cash_in?rp(x.cash_in):'-'}</td><td class="red">${x.cash_out?rp(x.cash_out):'-'}</td><td>${rp(bal)}</td><td>${esc(x.category)}</td><td>${esc(x.pic)}</td><td><div style="display:flex;gap:5px"><button class="btn secondary" onclick="editTx(${x.id})">Edit</button><button data-admin-only class="btn danger" onclick="delTx(${x.id})">Hapus</button></div></td></tr>`}).join('')||'<tr><td colspan="8">Tidak ada data</td></tr>'}
+ $('tx').innerHTML=arr.filter(x=>(!q||[x.description,x.category,x.pic].join(' ').toLowerCase().includes(q))&&(!mo||(x.transaction_date||'').startsWith(mo))).map(x=>{bal+=(+x.cash_in||0)-(+x.cash_out||0);return `<tr><td>${x.transaction_date}</td><td>${esc(x.description)}</td><td class="green">${x.cash_in?rp(x.cash_in):'-'}</td><td class="red">${x.cash_out?rp(x.cash_out):'-'}</td><td>${rp(bal)}</td><td>${esc(x.category)}</td><td>${esc(x.pic)}</td><td>${x.bill_photo_path?`<button class="btn secondary" style="padding:5px 8px" onclick="viewBill('${escAttr(x.bill_photo_path)}')">📷 Lihat</button>`:'-'}</td><td><div style="display:flex;gap:5px"><button class="btn secondary" onclick="editTx(${x.id})">Edit</button><button data-admin-only class="btn danger" onclick="delTx(${x.id})">Hapus</button></div></td></tr>`}).join('')||'<tr><td colspan="9">Tidak ada data</td></tr>'}
 function renderMembers(){
  const ms=['2026-09','2026-10','2026-11','2026-12'];
  $('m').innerHTML=members.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
@@ -451,8 +510,18 @@ function exportReportCSV(){
  a.click();URL.revokeObjectURL(a.href);
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]) )}
-$('txForm').onsubmit=async e=>{e.preventDefault();let i=+$('cin').value||0,o=+$('cout').value||0;if(!i&&!o)return alert('Isi kas masuk atau kas keluar.');try{await rest('transactions',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({transaction_date:$('date').value,description:$('desc').value,cash_in:i,cash_out:o,category:$('cat').value,pic:$('pic').value})});e.target.reset();$('date').value=new Date().toISOString().slice(0,10);await load()}catch(err){alert(err.message)}};
-async function delTx(id){if(confirm('Hapus transaksi ini?')){try{await rest('transactions?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}});await load()}catch(err){alert(err.message)}}}
+$('txForm').onsubmit=async e=>{e.preventDefault();let i=+$('cin').value||0,o=+$('cout').value||0;if(!i&&!o)return alert('Isi kas masuk atau kas keluar.');try{
+ const f=$('billPhoto').files[0]; let photo=null;
+ if(f){photo='bills/'+currentUser.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+fileExt(f);await storageUpload('bill-photos',photo,f);}
+ await rest('transactions',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({transaction_date:$('date').value,description:$('desc').value,cash_in:i,cash_out:o,category:$('cat').value,pic:$('pic').value,bill_photo_path:photo})});
+ e.target.reset();$('date').value=new Date().toISOString().slice(0,10);await load()
+ }catch(err){alert(err.message)}};
+async function delTx(id){if(confirm('Hapus transaksi ini?')){try{
+ const x=transactions.find(t=>t.id===id);
+ await rest('transactions?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}});
+ if(x?.bill_photo_path){try{await storageDelete('bill-photos',x.bill_photo_path)}catch(_){}}
+ await load()
+ }catch(err){alert(err.message)}}}
 function exportCSV(){
  const rows=[['Tanggal','Keterangan','Kas Masuk','Kas Keluar','Kategori','PIC']];
  [...transactions].sort((a,b)=>(a.transaction_date||'').localeCompare(b.transaction_date||'')).forEach(x=>rows.push([x.transaction_date,x.description,x.cash_in||0,x.cash_out||0,x.category||'',x.pic||'']));
@@ -463,7 +532,7 @@ function exportCSV(){
 function editTx(id){
  const x=transactions.find(t=>t.id===id); if(!x)return;
  $('editId').value=x.id; $('editDate').value=x.transaction_date||''; $('editCat').value=x.category||'';
- $('editDesc').value=x.description||''; $('editIn').value=x.cash_in||0; $('editOut').value=x.cash_out||0; $('editPic').value=x.pic||'';
+ $('editDesc').value=x.description||''; $('editIn').value=x.cash_in||0; $('editOut').value=x.cash_out||0; $('editPic').value=x.pic||''; $('editBillPhoto').value=''; $('editBillInfo').textContent=x.bill_photo_path?'Foto bill tersimpan. Pilih file baru jika ingin mengganti.':'Belum ada foto bill.';
  $('editPanel').style.display='block'; $('editPanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function cancelEdit(){ $('editPanel').style.display='none'; }
@@ -477,6 +546,32 @@ $('editForm').onsubmit=async e=>{
   cancelEdit(); await load();
  }catch(err){alert(err.message)}
 };
+
+async function loadActivities(){
+ if(!$('activityRows')||!accessToken)return;
+ try{
+  const q=($('actSearch').value||'').toLowerCase();
+  const a=await rest('activities?select=*&order=activity_date.desc,id.desc')||[];
+  $('activityRows').innerHTML=a.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.description||'').toLowerCase().includes(q)).map(x=>
+   `<tr><td>${esc(x.activity_date)}</td><td><b>${esc(x.name)}</b></td><td>${esc(x.description||'')}</td><td>${x.photo_path?`<button class="btn secondary" style="padding:5px 8px" onclick="viewActivityPhoto('${escAttr(x.photo_path)}')">📷 Lihat</button>`:'-'}</td><td>${currentRole==='admin'?`<button class="btn danger" style="padding:5px 8px" onclick="deleteActivity(${x.id})">Hapus</button>`:''}</td></tr>`
+  ).join('')||'<tr><td colspan="5">Belum ada dokumentasi.</td></tr>';
+ }catch(e){$('activityRows').innerHTML='<tr><td colspan="5">Gagal memuat: '+esc(e.message)+'</td></tr>'}
+}
+$('activityForm').onsubmit=async e=>{e.preventDefault();try{
+ const f=$('actPhoto').files[0];if(!f)return alert('Pilih foto kegiatan.');
+ const path='activities/'+currentUser.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+fileExt(f);
+ await storageUpload('activity-photos',path,f);
+ await rest('activities',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({activity_date:$('actDate').value,name:$('actName').value,description:$('actDesc').value,photo_path:path,created_by:currentUser.id})});
+ e.target.reset();$('actDate').value=new Date().toISOString().slice(0,10);await loadActivities();
+}catch(err){alert(err.message)}};
+$('actSearch').oninput=loadActivities;
+async function deleteActivity(id){if(currentRole!=='admin')return;if(!confirm('Hapus dokumentasi kegiatan ini?'))return;try{
+ const a=await rest('activities?id=eq.'+encodeURIComponent(id)+'&select=photo_path')||[];
+ await rest('activities?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}});
+ if(a[0]?.photo_path){try{await storageDelete('activity-photos',a[0].photo_path)}catch(_){}}
+ await loadActivities();
+}catch(e){alert(e.message)}}
+
 async function addMember(){let n=$('newName').value.trim();if(!n)return;try{await rest('members',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({name:n})});$('newName').value='';await load()}catch(err){alert(err.message)}}
 async function pay(){let id=+$('m').value, month=$('pm').value+'-15',amount=+$('pa').value||0;try{await rest('member_payments',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({member_id:id,payment_month:month,amount})});await load()}catch(err){alert(err.message)}}
 async function delPayment(id){if(currentRole!=='admin'){alert('Hanya Admin yang dapat menghapus iuran.');return}if(!confirm('Hapus iuran ini? Data akan langsung dihapus dan saldo/laporan akan dihitung ulang.'))return;try{const d=await adminApi('delete_payment',{payment_id:id});if(!d?.success)throw new Error(d?.error||'Gagal menghapus iuran.');await load()}catch(err){alert(err.message)}}
@@ -489,9 +584,9 @@ async function delPayment(id){
     await load();
   }catch(err){alert(err.message)}
 }
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if(b.dataset.v==='users'&&currentRole!=='admin')return;document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(b.dataset.v).classList.add('active');if(b.dataset.v==='users')loadUsers();if(b.dataset.v==='reports')renderReport()});
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if((b.dataset.v==='users'||b.dataset.v==='settings')&&currentRole!=='admin')return;document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(b.dataset.v).classList.add('active');if(b.dataset.v==='users')loadUsers();if(b.dataset.v==='reports')renderReport();if(b.dataset.v==='activities')loadActivities()});
 $('q').oninput=renderTx;$('mo').oninput=renderTx;$('yearFilter').onchange=render;$('monthFilter').onchange=render;['rpYear','rpMonth','rpCat'].forEach(id=>$(id).onchange=renderReport);$('rpQ').oninput=renderReport;
-$('url').value=localStorage.getItem('supabase_url')||'';$('key').value=localStorage.getItem('supabase_key')||'';$('date').value=new Date().toISOString().slice(0,10);
+$('url').value=localStorage.getItem('supabase_url')||'';$('key').value=localStorage.getItem('supabase_key')||'';$('date').value=new Date().toISOString().slice(0,10);$('actDate').value=new Date().toISOString().slice(0,10);
 $('loginForm').onsubmit=e=>{e.preventDefault();login()};$('logoutBtn').onclick=logout;
 const ss=localStorage.getItem('supabase_session');
 // V8.9: koneksi Supabase tertanam di aplikasi, sehingga komputer/perangkat baru langsung siap login.
