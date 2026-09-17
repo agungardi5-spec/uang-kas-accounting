@@ -1,8 +1,9 @@
+
 <!doctype html>
 <html lang="id">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uang Kas Accounting 2026 V9.0</title>
+<title>Uang Kas Accounting 2026 V12.8</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;background:#f4f7fb;color:#172033}
 header{background:#0f172a;color:white;padding:16px 20px;position:sticky;top:0;z-index:5}.head{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;font-size:20px}.sub{font-size:12px;opacity:.7}
@@ -68,7 +69,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  </div>
 </div>
 <div id="appShell" style="display:none">
-<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V9.0</div><div class="sub">Database Supabase • Online</div></div>
+<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V12.8</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
 <nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="activities">Kegiatan</button>
 <button class="tab" data-v="dues-monitor">Monitoring Iuran</button>
@@ -121,6 +122,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div class="toolbar">
 <select id="mapUserId"><option value="">-- Pilih User --</option></select>
 <select id="mapMemberId"><option value="">-- Pilih Anggota --</option></select>
+<select id="mapScope"><option value="one">1 Anggota</option><option value="all">Semua Anggota</option></select>
 <button class="btn primary" type="button" onclick="saveUserMemberMap()">Simpan Pengaitan</button>
 </div>
 <div id="mapMsg" class="notice"></div>
@@ -401,10 +403,48 @@ function render(){
  $('memberSummary').innerHTML=`<div class="grid" style="grid-template-columns:repeat(3,1fr)"><div><div class="label">Anggota</div><div class="value">${members.length}</div></div><div><div class="label">Iuran Tercatat</div><div class="value green">${rp(totalPay)}</div></div><div><div class="label">Pembayaran</div><div class="value">${payments.length}</div></div></div>`;
  renderTx(); renderMembers(); renderReport();
 }
-function renderTx(){let q=($('q').value||'').toLowerCase(),mo=$('mo').value||'',bal=opening;
+function renderTx(){
+ let q=($('q').value||'').toLowerCase(),mo=$('mo').value||'',bal=opening;
  const arr=[...transactions].sort((a,b)=>(a.transaction_date||'').localeCompare(b.transaction_date||'')||a.id-b.id);
- const duesByDate={}; payments.forEach(p=>{const d=p.payment_month||'';duesByDate[d]=(duesByDate[d]||0)+(+p.amount||0)});
- $('tx').innerHTML=arr.filter(x=>(!q||[x.description,x.category,x.pic].join(' ').toLowerCase().includes(q))&&(!mo||(x.transaction_date||'').startsWith(mo))).map(x=>{bal+=(+x.cash_in||0)-(+x.cash_out||0);return `<tr><td>${x.transaction_date}</td><td>${esc(x.description)}</td><td class="green">${x.cash_in?rp(x.cash_in):'-'}</td><td class="red">${x.cash_out?rp(x.cash_out):'-'}</td><td>${rp(bal)}</td><td>${esc(x.category)}</td><td>${esc(x.pic)}</td><td>${x.bill_photo_path?`<button class="btn secondary" style="padding:5px 8px" onclick="viewBill('${escAttr(x.bill_photo_path)}')">📷 Lihat</button>`:'-'}</td><td><div style="display:flex;gap:5px">${currentRole==='admin'?`${currentRole === "admin" ? `<button class="btn secondary" onclick="editTx(${x.id})">Edit</button>` : ""}`:''}<button data-admin-only class="btn danger" onclick="delTx(${x.id})">Hapus</button></div></td></tr>`}).join('')||'<tr><td colspan="9">Tidak ada data</td></tr>'}
+ // Iuran ditampilkan sebagai 1 baris total per bulan, tanpa membuat transaksi palsu di database.
+ const duesMap={};
+ payments.forEach(p=>{
+   const month=(p.payment_month||'').slice(0,7);
+   if(!month)return;
+   if(!duesMap[month]) duesMap[month]={amount:0,lastDate:''};
+   duesMap[month].amount+=(+p.amount||0);
+   const dt=(p.created_at||p.payment_month||'').slice(0,10);
+   if(dt>duesMap[month].lastDate) duesMap[month].lastDate=dt;
+ });
+ const duesRows=Object.entries(duesMap).map(([month,v])=>({
+   id:'dues-'+month,
+   transaction_date:v.lastDate||month+'-01',
+   description:'Iuran Anggota '+month,
+   cash_in:v.amount,
+   cash_out:0,
+   category:'Iuran Anggota',
+   pic:'System',
+   bill_photo_path:null,
+   synthetic:true
+ }));
+ const combined=[...arr,...duesRows].sort((a,b)=>
+   (a.transaction_date||'').localeCompare(b.transaction_date||'') ||
+   (a.synthetic?1:0)-(b.synthetic?1:0) ||
+   ((a.id+'') .localeCompare(b.id+''))
+ );
+ const filtered=combined.filter(x=>
+   (!q||[x.description,x.category,x.pic].join(' ').toLowerCase().includes(q)) &&
+   (!mo||(x.transaction_date||'').startsWith(mo))
+ );
+ $('tx').innerHTML=filtered.map(x=>{
+   bal+=(+x.cash_in||0)-(+x.cash_out||0);
+   const action=x.synthetic
+     ? '<span style="font-size:11px;color:#667085">Dikelola di Iuran Anggota</span>'
+     : `<div style="display:flex;gap:5px">${currentRole==='admin'?`<button class="btn secondary" onclick="editTx(${x.id})">Edit</button>`:''}<button data-admin-only class="btn danger" onclick="delTx(${x.id})">Hapus</button></div>`;
+   return `<tr><td>${x.transaction_date}</td><td>${esc(x.description)}</td><td class="green">${x.cash_in?rp(x.cash_in):'-'}</td><td class="red">${x.cash_out?rp(x.cash_out):'-'}</td><td>${rp(bal)}</td><td>${esc(x.category)}</td><td>${esc(x.pic)}</td><td>${x.bill_photo_path?`<button class="btn secondary" style="padding:5px 8px" onclick="viewBill('${escAttr(x.bill_photo_path)}')">📷 Lihat</button>`:'-'}</td><td>${action}</td></tr>`;
+ }).join('')||'<tr><td colspan="9">Tidak ada data</td></tr>';
+ applyRoleUI();
+}
 function renderMembers(){
  const ms=['2026-09','2026-10','2026-11','2026-12'];
  $('m').innerHTML=members.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
@@ -838,9 +878,14 @@ async function loadDuesMonitor(){
 
     let visible=members||[];
     if(currentRole!=='admin'){
-      const prof=await rest('profiles?id=eq.'+encodeURIComponent(currentUser.id)+'&select=member_id')||[];
-      const memberId=prof[0]?.member_id;
-      visible=memberId ? visible.filter(m=>String(m.id)===String(memberId)) : [];
+      const prof=await rest('profiles?id=eq.'+encodeURIComponent(currentUser.id)+'&select=member_id,member_scope')||[];
+      const p=prof[0];
+      if(p?.member_scope==='all'){
+        visible=members||[];
+      }else{
+        const memberId=p?.member_id;
+        visible=memberId ? visible.filter(m=>String(m.id)===String(memberId)) : [];
+      }
     }
 
     const tb=document.querySelector('#duesMonitorTable tbody');
@@ -885,12 +930,9 @@ document.addEventListener('DOMContentLoaded',()=>{setDefaultDuesMonth();});
 async function loadUserMemberMapping(){
   if(currentRole!=='admin')return;
   try{
-    const [ud,ms]=await Promise.all([
-      adminApi('list'),
-      rest('members?select=id,name&order=name.asc')
-    ]);
+    const [ud,ms]=await Promise.all([adminApi('list'),rest('members?select=id,name&order=name.asc')]);
     const users=(ud.users||[]).filter(u=>u.role==='user');
-    const us=$('mapUserId'), msEl=$('mapMemberId'), createSel=$('newUserMemberId');
+    const us=$('mapUserId'), msEl=$('mapMemberId'), createSel=$('newUserMemberId'), scopeEl=$('mapScope');
     const userOpts='<option value="">-- Pilih User --</option>'+users.map(u=>`<option value="${u.id}">${esc(u.username||u.email||u.id)}</option>`).join('');
     const memberOpts='<option value="">-- Pilih Anggota --</option>'+(ms||[]).map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
     if(us)us.innerHTML=userOpts;
@@ -899,23 +941,27 @@ async function loadUserMemberMapping(){
     if(us)us.onchange=()=>{
       const u=users.find(x=>String(x.id)===String(us.value));
       if(msEl)msEl.value=u?.member_id?String(u.member_id):'';
+      if(scopeEl)scopeEl.value=u?.member_scope||'one';
+      if(msEl)msEl.disabled=(u?.member_scope==='all');
     };
+    if(scopeEl)scopeEl.onchange=()=>{if(msEl)msEl.disabled=scopeEl.value==='all';};
   }catch(e){
     console.warn('Mapping:',e);
     const msg=$('mapMsg'); if(msg)msg.textContent='Gagal memuat User/Anggota: '+e.message;
-    const us=$('mapUserId'), msEl=$('mapMemberId');
     if(us)us.innerHTML='<option value="">Gagal memuat User</option>';
     if(msEl)msEl.innerHTML='<option value="">Gagal memuat Anggota</option>';
   }
 }
 async function saveUserMemberMap(){
   const user_id=$('mapUserId')?.value, member_id=$('mapMemberId')?.value;
-  if(!user_id||!member_id){$('mapMsg').textContent='Pilih User dan Anggota terlebih dahulu.';return;}
+  const scope=$('mapScope')?.value||'one';
+  if(!user_id){$('mapMsg').textContent='Pilih User terlebih dahulu.';return;}
+  if(scope==='one' && !member_id){$('mapMsg').textContent='Pilih Anggota terlebih dahulu.';return;}
   try{
     $('mapMsg').textContent='Menyimpan...';
-    await adminApi('set_member',{user_id,member_id:Number(member_id)});
-    $('mapMsg').textContent='Pengaitan berhasil disimpan.';
-    await loadUsers();
+    await adminApi('set_member',{user_id,member_id:scope==='all'?null:Number(member_id),member_scope:scope});
+    $('mapMsg').textContent=scope==='all'?'User sekarang dapat melihat semua anggota.':'Pengaitan 1 anggota berhasil disimpan.';
+    await loadUserMemberMapping();
   }catch(e){$('mapMsg').textContent='Gagal: '+e.message;}
 }
 
