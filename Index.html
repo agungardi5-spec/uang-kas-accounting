@@ -355,7 +355,7 @@ function render(){
 function renderTx(){let q=($('q').value||'').toLowerCase(),mo=$('mo').value||'',bal=opening;
  const arr=[...transactions].sort((a,b)=>(a.transaction_date||'').localeCompare(b.transaction_date||'')||a.id-b.id);
  const duesByDate={}; payments.forEach(p=>{const d=p.payment_month||'';duesByDate[d]=(duesByDate[d]||0)+(+p.amount||0)});
- $('tx').innerHTML=arr.filter(x=>(!q||[x.description,x.category,x.pic].join(' ').toLowerCase().includes(q))&&(!mo||(x.transaction_date||'').startsWith(mo))).map(x=>{bal+=(+x.cash_in||0)-(+x.cash_out||0);return `<tr><td>${x.transaction_date}</td><td>${esc(x.description)}</td><td class="green">${x.cash_in?rp(x.cash_in):'-'}</td><td class="red">${x.cash_out?rp(x.cash_out):'-'}</td><td>${rp(bal)}</td><td>${esc(x.category)}</td><td>${esc(x.pic)}</td><td>${x.bill_photo_path?`<button class="btn secondary" style="padding:5px 8px" onclick="viewBill('${escAttr(x.bill_photo_path)}')">📷 Lihat</button>`:'-'}</td><td><div style="display:flex;gap:5px">${currentRole==='admin'?`<button class="btn secondary" onclick="editTx(${x.id})">Edit</button>`:''}<button data-admin-only class="btn danger" onclick="delTx(${x.id})">Hapus</button></div></td></tr>`}).join('')||'<tr><td colspan="9">Tidak ada data</td></tr>'}
+ $('tx').innerHTML=arr.filter(x=>(!q||[x.description,x.category,x.pic].join(' ').toLowerCase().includes(q))&&(!mo||(x.transaction_date||'').startsWith(mo))).map(x=>{bal+=(+x.cash_in||0)-(+x.cash_out||0);return `<tr><td>${x.transaction_date}</td><td>${esc(x.description)}</td><td class="green">${x.cash_in?rp(x.cash_in):'-'}</td><td class="red">${x.cash_out?rp(x.cash_out):'-'}</td><td>${rp(bal)}</td><td>${esc(x.category)}</td><td>${esc(x.pic)}</td><td>${x.bill_photo_path?`<button class="btn secondary" style="padding:5px 8px" onclick="viewBill('${escAttr(x.bill_photo_path)}')">📷 Lihat</button>`:'-'}</td><td><div style="display:flex;gap:5px">${currentRole==='admin'?`${currentRole === "admin" ? `<button class="btn secondary" onclick="editTx(${x.id})">Edit</button>` : ""}`:''}<button data-admin-only class="btn danger" onclick="delTx(${x.id})">Hapus</button></div></td></tr>`}).join('')||'<tr><td colspan="9">Tidak ada data</td></tr>'}
 function renderMembers(){
  const ms=['2026-09','2026-10','2026-11','2026-12'];
  $('m').innerHTML=members.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
@@ -662,5 +662,26 @@ applyFeatureRoleUI = function(){
   _v911OldApplyFeatureRoleUI();
   applyFeatureRoleUI_v911();
 };
+
+
+// V9.1.2 — User hanya melihat transaksi; tidak dapat Edit/Hapus.
+function enforceUserTransactionView(){
+  if(currentRole !== 'admin'){
+    document.querySelectorAll('#tx button').forEach(btn => {
+      const t=(btn.textContent||'').trim().toLowerCase();
+      if(t==='edit' || t==='hapus') btn.remove();
+    });
+    const ep=$('editPanel');
+    if(ep) ep.style.display='none';
+  }
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const tx=document.getElementById('tx');
+  if(tx){
+    const obs=new MutationObserver(enforceUserTransactionView);
+    obs.observe(tx,{childList:true,subtree:true});
+  }
+  enforceUserTransactionView();
+});
 
 </script></body></html>
