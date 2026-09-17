@@ -45,6 +45,11 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  .chartgrid{height:150px}.barcol{height:135px}
 }
 .chartgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;align-items:end;height:220px;padding:8px 0}.barcol{height:200px;display:flex;align-items:flex-end;justify-content:center;gap:3px}.bar{width:45%;min-width:4px;border-radius:5px 5px 0 0}.inbar{background:#0b8f6a}.outbar{background:#d14343}.balbar{background:#334155}.axislabel{text-align:center;font-size:11px}.legend{display:flex;gap:16px;font-size:12px;margin-top:8px}.legend span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}.legend .li:before{background:#0b8f6a}.legend .lo:before{background:#d14343}.legend .lb:before{background:#334155}
+
+<style>
+  .admin-only-feature { }
+</style>
+
 </style>
 </head>
 <body>
@@ -89,9 +94,9 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 
 <section id="transactions" class="view"><div class="panel"><h3>Tambah Transaksi</h3>
 <form id="txForm"><div><label>Tanggal</label><input id="date" type="date" required></div><div><label>Kategori</label><input id="cat"></div>
-<div class="full"><label>Keterangan</label><input id="desc" required></div><div class="full"><label>Foto Bill / Bukti Transaksi</label><input id="billPhoto" type="file" accept="image/*" capture="environment"><div class="notice">Opsional. Foto disimpan di Supabase Storage dan dapat dilihat dari perangkat lain.</div></div><div><label>Kas Masuk</label><input id="cin" type="number" min="0" value="0"></div><div><label>Kas Keluar</label><input id="cout" type="number" min="0" value="0"></div><div><label>PIC</label><input id="pic"></div>
+<div class="full"><label>Keterangan</label><input id="desc" required></div><div class="full"><label>Foto Bill / Bukti Transaksi</label><input id="billPhoto" data-admin-only-feature="true" type="file" accept="image/*" capture="environment"><div class="notice">Opsional. Foto disimpan di Supabase Storage dan dapat dilihat dari perangkat lain.</div></div><div><label>Kas Masuk</label><input id="cin" type="number" min="0" value="0"></div><div><label>Kas Keluar</label><input id="cout" type="number" min="0" value="0"></div><div><label>PIC</label><input id="pic"></div>
 <div class="full actions"><button class="btn secondary" type="reset">Reset</button><button class="btn primary">+ Simpan</button></div></form></div>
-<div class="panel" id="editPanel" style="display:none"><h3>Edit Transaksi</h3><form id="editForm"><input type="hidden" id="editId"><div><label>Tanggal</label><input id="editDate" type="date" required></div><div><label>Kategori</label><input id="editCat"></div><div class="full"><label>Keterangan</label><input id="editDesc" required></div><div class="full"><label>Ganti Foto Bill / Bukti</label><input id="editBillPhoto" type="file" accept="image/*" capture="environment"><div id="editBillInfo" class="notice"></div></div><div><label>Kas Masuk</label><input id="editIn" type="number" min="0"></div><div><label>Kas Keluar</label><input id="editOut" type="number" min="0"></div><div><label>PIC</label><input id="editPic"></div><div class="full actions"><button type="button" class="btn secondary" onclick="cancelEdit()">Batal</button><button class="btn primary">Simpan Perubahan</button></div></form></div><div class="panel"><h3>Data Transaksi</h3><div class="toolbar"><input id="q" placeholder="Cari..."><input id="mo" type="month"><button class="btn secondary" onclick="load()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Masuk</th><th>Keluar</th><th>Saldo</th><th>Kategori</th><th>PIC</th><th>Bill</th><th></th></tr></thead><tbody id="tx"></tbody></table></div></div></section>
+<div class="panel" id="editPanel" data-admin-only-feature="true" style="display:none"><h3>Edit Transaksi</h3><form id="editForm"><input type="hidden" id="editId"><div><label>Tanggal</label><input id="editDate" type="date" required></div><div><label>Kategori</label><input id="editCat"></div><div class="full"><label>Keterangan</label><input id="editDesc" required></div><div class="full"><label>Ganti Foto Bill / Bukti</label><input id="editBillPhoto" data-admin-only-feature="true" type="file" accept="image/*" capture="environment"><div id="editBillInfo" class="notice"></div></div><div><label>Kas Masuk</label><input id="editIn" type="number" min="0"></div><div><label>Kas Keluar</label><input id="editOut" type="number" min="0"></div><div><label>PIC</label><input id="editPic"></div><div class="full actions"><button type="button" class="btn secondary" onclick="cancelEdit()">Batal</button><button class="btn primary">Simpan Perubahan</button></div></form></div><div class="panel"><h3>Data Transaksi</h3><div class="toolbar"><input id="q" placeholder="Cari..."><input id="mo" type="month"><button class="btn secondary" onclick="load()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Masuk</th><th>Keluar</th><th>Saldo</th><th>Kategori</th><th>PIC</th><th>Bill</th><th></th></tr></thead><tbody id="tx"></tbody></table></div></div></section>
 
 <section id="members" class="view"><div class="panel"><h3>Anggota</h3><div class="toolbar"><input id="newName" placeholder="Nama anggota"><button data-admin-only class="btn primary" onclick="addMember()">+ Tambah</button></div>
 <div class="toolbar"><select id="m"></select><input id="pm" type="month" value="2026-09"><input id="pa" type="number" value="20000" min="0"><button class="btn primary" onclick="pay()">Simpan Iuran</button></div><div class="notice">Klik Simpan Iuran untuk mengubah status anggota pada bulan yang dipilih. Tabel menampilkan status September–Desember 2026.</div>
@@ -137,7 +142,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 
 <section id="activities" class="view">
  <div class="panel"><h3>📸 Dokumentasi Kegiatan</h3><div class="notice">Fitur ini membutuhkan setup Supabase Storage & tabel kegiatan satu kali.</div>
-  <form id="activityForm">
+  <form id="activityForm" data-admin-only-feature="true">
    <div><label>Tanggal</label><input id="actDate" type="date" required></div>
    <div><label>Nama Kegiatan</label><input id="actName" required placeholder="Contoh: Rapat Accounting"></div>
    <div class="full"><label>Keterangan</label><input id="actDesc" placeholder="Keterangan kegiatan"></div>
@@ -350,7 +355,7 @@ function render(){
 function renderTx(){let q=($('q').value||'').toLowerCase(),mo=$('mo').value||'',bal=opening;
  const arr=[...transactions].sort((a,b)=>(a.transaction_date||'').localeCompare(b.transaction_date||'')||a.id-b.id);
  const duesByDate={}; payments.forEach(p=>{const d=p.payment_month||'';duesByDate[d]=(duesByDate[d]||0)+(+p.amount||0)});
- $('tx').innerHTML=arr.filter(x=>(!q||[x.description,x.category,x.pic].join(' ').toLowerCase().includes(q))&&(!mo||(x.transaction_date||'').startsWith(mo))).map(x=>{bal+=(+x.cash_in||0)-(+x.cash_out||0);return `<tr><td>${x.transaction_date}</td><td>${esc(x.description)}</td><td class="green">${x.cash_in?rp(x.cash_in):'-'}</td><td class="red">${x.cash_out?rp(x.cash_out):'-'}</td><td>${rp(bal)}</td><td>${esc(x.category)}</td><td>${esc(x.pic)}</td><td>${x.bill_photo_path?`<button class="btn secondary" style="padding:5px 8px" onclick="viewBill('${escAttr(x.bill_photo_path)}')">📷 Lihat</button>`:'-'}</td><td><div style="display:flex;gap:5px"><button class="btn secondary" onclick="editTx(${x.id})">Edit</button><button data-admin-only class="btn danger" onclick="delTx(${x.id})">Hapus</button></div></td></tr>`}).join('')||'<tr><td colspan="9">Tidak ada data</td></tr>'}
+ $('tx').innerHTML=arr.filter(x=>(!q||[x.description,x.category,x.pic].join(' ').toLowerCase().includes(q))&&(!mo||(x.transaction_date||'').startsWith(mo))).map(x=>{bal+=(+x.cash_in||0)-(+x.cash_out||0);return `<tr><td>${x.transaction_date}</td><td>${esc(x.description)}</td><td class="green">${x.cash_in?rp(x.cash_in):'-'}</td><td class="red">${x.cash_out?rp(x.cash_out):'-'}</td><td>${rp(bal)}</td><td>${esc(x.category)}</td><td>${esc(x.pic)}</td><td>${x.bill_photo_path?`<button class="btn secondary" style="padding:5px 8px" onclick="viewBill('${escAttr(x.bill_photo_path)}')">📷 Lihat</button>`:'-'}</td><td><div style="display:flex;gap:5px">${currentRole==='admin'?`${currentRole === "admin" ? `<button class="btn secondary" onclick="editTx(${x.id})">Edit</button>` : ""}`:''}<button data-admin-only class="btn danger" onclick="delTx(${x.id})">Hapus</button></div></td></tr>`}).join('')||'<tr><td colspan="9">Tidak ada data</td></tr>'}
 function renderMembers(){
  const ms=['2026-09','2026-10','2026-11','2026-12'];
  $('m').innerHTML=members.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
@@ -529,7 +534,7 @@ function exportCSV(){
  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Laporan_Uang_Kas_Accounting_2026.csv';a.click();URL.revokeObjectURL(a.href);
 }
-function editTx(id){
+function editTx(id){if(currentRole!=='admin'){return;}
  const x=transactions.find(t=>t.id===id); if(!x)return;
  $('editId').value=x.id; $('editDate').value=x.transaction_date||''; $('editCat').value=x.category||'';
  $('editDesc').value=x.description||''; $('editIn').value=x.cash_in||0; $('editOut').value=x.cash_out||0; $('editPic').value=x.pic||''; $('editBillPhoto').value=''; $('editBillInfo').textContent=x.bill_photo_path?'Foto bill tersimpan. Pilih file baru jika ingin mengganti.':'Belum ada foto bill.';
@@ -601,4 +606,82 @@ if(ss&&supaUrl&&supaKey){
   });
  }catch(_){localStorage.removeItem('supabase_session')}
 }
+
+
+// V9.1 — Bill & Kegiatan: only Admin may create/edit/delete; User may view.
+function applyFeatureRoleUI(){
+  const isAdmin = currentRole === 'admin';
+
+  document.querySelectorAll('[data-admin-only-feature="true"]').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
+
+  // Hide activity edit/delete controls for User, while keeping photo viewing.
+  document.querySelectorAll('#activitiesTable button, #activitiesTable a').forEach(el => {
+    const txt = (el.textContent || '').toLowerCase();
+    if (txt.includes('hapus') || txt.includes('edit') || txt.includes('ubah')) {
+      el.style.display = isAdmin ? '' : 'none';
+    }
+  });
+
+  // Hide bill add/change controls for User.
+  document.querySelectorAll('input[type="file"][data-admin-only-feature="true"]').forEach(el => {
+    el.disabled = !isAdmin;
+  });
+}
+
+const _v91ApplyRoleUI = applyRoleUI;
+applyRoleUI = function(){
+  _v91ApplyRoleUI();
+  applyFeatureRoleUI();
+};
+
+document.addEventListener('click', function(e){
+  if(currentRole !== 'admin'){
+    const el = e.target.closest('[data-admin-only-feature="true"]');
+    if(el){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+}, true);
+
+
+// V9.1.1 — Hide transaction editing controls for User.
+function applyFeatureRoleUI_v911(){
+  const isAdmin = currentRole === 'admin';
+  document.querySelectorAll('#tx button').forEach(el => {
+    const txt = (el.textContent || '').trim().toLowerCase();
+    if (txt === 'edit' || txt === 'hapus') el.style.display = isAdmin ? '' : 'none';
+  });
+  const ep = $('editPanel');
+  if(ep && !isAdmin) ep.style.display='none';
+}
+const _v911OldApplyFeatureRoleUI = applyFeatureRoleUI;
+applyFeatureRoleUI = function(){
+  _v911OldApplyFeatureRoleUI();
+  applyFeatureRoleUI_v911();
+};
+
+
+// V9.1.2 — User hanya melihat transaksi; tidak dapat Edit/Hapus.
+function enforceUserTransactionView(){
+  if(currentRole !== 'admin'){
+    document.querySelectorAll('#tx button').forEach(btn => {
+      const t=(btn.textContent||'').trim().toLowerCase();
+      if(t==='edit' || t==='hapus') btn.remove();
+    });
+    const ep=$('editPanel');
+    if(ep) ep.style.display='none';
+  }
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const tx=document.getElementById('tx');
+  if(tx){
+    const obs=new MutationObserver(enforceUserTransactionView);
+    obs.observe(tx,{childList:true,subtree:true});
+  }
+  enforceUserTransactionView();
+});
+
 </script></body></html>
