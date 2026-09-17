@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -108,11 +109,11 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div class="panel"><h3>👥 Manajemen Pengguna</h3><div class="notice">Menu ini hanya terlihat oleh Admin. User biasa tidak dapat mengelola akun.</div></div>
 <div class="panel"><h3>Tambah Pengguna</h3><form id="userForm">
 <div><label>Nama Pengguna</label><input id="newUserUsername" type="text" required placeholder="contoh: agungardi" pattern="[A-Za-z0-9._-]{3,30}"></div>
-<div><label>Email</label><input id="newUserEmail" type="email" required placeholder="nama@email.com"></div>
+<div><span style="display:none"><label>Email</label><span style="display:none"><input id="newUserEmail" type="hidden" value="" aria-hidden="true" required placeholder="nama@email.com"></span></div>
 <div><label>Password sementara</label><input id="newUserPassword" type="password" minlength="6" required placeholder="Minimal 6 karakter"></div>
 <div><label>Role</label><select id="newUserRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
 <div class="actions" style="align-items:end"><button class="btn primary" type="submit">+ Buat Pengguna</button></div>
-</form><div id="userMsg" class="notice"></div></div>
+</form><div class="notice">Email akun dibuat otomatis oleh sistem. Admin cukup mengisi username, password, dan role.</div><div id="userMsg" class="notice"></div></div>
 <div class="panel"><div class="toolbar"><input id="userSearch" placeholder="Cari nama pengguna / email..."><button class="btn secondary" onclick="loadUsers()">↻ Refresh</button></div>
 <div class="tablewrap"><table style="min-width:780px"><thead><tr><th>Nama Pengguna</th><th>Email</th><th>Role</th><th>Status</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="userTable"></tbody></table></div></div>
 </section>
@@ -188,7 +189,7 @@ async function loadUsers(){
 async function changeUserRole(id,role){if(!confirm('Ubah role menjadi '+role+'?'))return;try{await adminApi('set_role',{user_id:id,role});await loadUsers()}catch(e){alert(e.message)}}
 async function toggleUser(id,disabled){if(!confirm(disabled?'Nonaktifkan pengguna ini?':'Aktifkan pengguna ini?'))return;try{await adminApi('set_disabled',{user_id:id,disabled});await loadUsers()}catch(e){alert(e.message)}}
 async function deleteUser(id){if(!confirm('Hapus akun ini? Tindakan tidak dapat dibatalkan.'))return;try{await adminApi('delete',{user_id:id});await loadUsers()}catch(e){alert(e.message)}}
-$('userForm').onsubmit=async e=>{e.preventDefault();try{$('userMsg').textContent='Membuat pengguna...';await adminApi('create',{username:$('newUserUsername').value.trim(),email:$('newUserEmail').value.trim(),password:$('newUserPassword').value,role:$('newUserRole').value});$('userForm').reset();$('userMsg').textContent='Pengguna berhasil dibuat.';await loadUsers()}catch(err){$('userMsg').textContent='Gagal: '+err.message}};
+$('userForm').onsubmit=async e=>{e.preventDefault();try{$('userMsg').textContent='Membuat pengguna...';await adminApi('create',{username:$('newUserUsername').value.trim(),password:$('newUserPassword').value,role:$('newUserRole').value});$('userForm').reset();$('userMsg').textContent='Pengguna berhasil dibuat.';await loadUsers()}catch(err){$('userMsg').textContent='Gagal: '+err.message}};
 $('userSearch').oninput=loadUsers;
 async function connect(){
  const url=$('url').value.trim().replace(/\/$/,''), key=$('key').value.trim();
