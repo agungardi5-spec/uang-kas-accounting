@@ -71,7 +71,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  </div>
 </div>
 <div id="appShell" style="display:none">
-<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V8.4</div><div class="sub">Database Supabase • Online</div></div>
+<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V8.6</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
 <nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings">Koneksi</button></nav></header>
 <main>
@@ -140,7 +140,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div class="panel"><div class="rphead" id="rpInfo"></div><div class="grid grid6" id="rpSummary"></div></div>
 <div class="panel"><h3>Rincian Laporan</h3><div class="notice" style="margin-bottom:8px">Iuran anggota digabung ke Kas Masuk dan ditampilkan sebagai total iuran per bulan.</div><div class="tablewrap"><table style="min-width:820px"><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kas Masuk</th><th>Kas Keluar</th><th>Saldo</th><th>Kategori</th><th>PIC</th></tr></thead><tbody id="rpRows"></tbody><tfoot id="rpFoot"></tfoot></table></div></div>
 <div class="panel"><h3 id="rpDuesTitle">Total Iuran Anggota per Bulan</h3><div class="tablewrap"><table style="min-width:520px"><thead><tr><th>Bulan</th><th>Total Iuran</th></tr></thead><tbody id="rpDues"></tbody><tfoot id="rpDuesFoot"></tfoot></table></div></div>
-<div class="panel"><h3 id="rpChartTitle">Grafik Kas Masuk vs Kas Keluar per Bulan</h3><div id="rpChartIO"></div><div id="rpChartBal"></div></div>
+
 </section>
 <section id="settings" class="view"><div class="panel"><h3>Koneksi Supabase</h3>
 <p class="notice">Masukkan <b>Project URL</b> dan <b>Publishable key</b> dari tombol Connect di Supabase. Setelah tersimpan, pengguna harus login dengan akun Supabase Auth. Nilai disimpan hanya di browser ini. Jika tombol tidak merespons, gunakan versi terbaru ini karena tidak bergantung pada library eksternal.</p>
@@ -286,8 +286,8 @@ function render(){
  balances.map((v,i)=>{let h=Math.max(3,Math.round(v/bm*145));return `<div><div class="barcol" style="height:155px"><div class="bar balbar" title="Saldo ${monthly[i].n}: ${rp(v)}" style="height:${h}px;width:70%"></div></div><div class="axislabel">${monthly[i].n}</div></div>`}).join('')+
 `</div>`;
 
- $('monthly').innerHTML=`<div class="tablewrap"><table style="min-width:620px"><thead><tr><th>Bulan</th><th>Kas Masuk</th><th>Iuran</th><th>Kas Keluar</th><th>Net</th><th>Saldo</th></tr></thead><tbody>`+
- monthly.map((x,i)=>`<tr><td><b>${x.n}</b></td><td class="green">${rp(x.inn)}</td><td class="green">${rp(x.d)}</td><td class="red">${rp(x.out)}</td><td><b>${rp(x.net)}</b></td><td><b>${rp(balances[i])}</b></td></tr>`).join('')+
+ $('monthly').innerHTML=`<div class="tablewrap"><table style="min-width:620px"><thead><tr><th>Bulan</th><th>Kas Masuk</th><th>Kas Keluar</th><th>Net</th><th>Saldo</th></tr></thead><tbody>`+
+ monthly.map((x,i)=>`<tr><td><b>${x.n}</b></td><td class="green">${rp(x.inn+x.d)}</td><td class="red">${rp(x.out)}</td><td><b>${rp(x.net)}</b></td><td><b>${rp(balances[i])}</b></td></tr>`).join('')+
 `</tbody></table></div>`;
 
  const totalPay=payments.reduce((s,x)=>s+(+x.amount||0),0);
@@ -413,7 +413,6 @@ function renderReport(){
  $('rpFoot').innerHTML=R.detail.length?`<tr><th colspan="2">Total</th><th class="green">${rp(R.cashIn)}</th><th class="red">${rp(R.cashOut)}</th><th>${rp(R.closingBal)}</th><th colspan="2"></th></tr>`:'';
 
  renderReportDues(R);
- renderReportCharts(R);
 }
 /* Rekap iuran: total seluruh pembayaran per bulan, tanpa rincian nama anggota. */
 function reportDuesRecap(R){
@@ -430,31 +429,6 @@ function renderReportDues(R){
  $('rpDues').innerHTML=rows.map(r=>`<tr><td><b>${r.name}</b></td><td class="green"><b>${rp(r.total)}</b></td></tr>`).join('');
  const total=rows.reduce((s,r)=>s+r.total,0);
  $('rpDuesFoot').innerHTML=`<tr><th>Total</th><th class="green">${rp(total)}</th></tr>`;
-}
-function renderReportCharts(R){
- const y=R.chartYear, rows=reportRows().filter(r=>rpMatch(r,R.f));
- const monthly=RP_MS.map((mm,i)=>{
-  const a=rows.filter(r=>(r.date||'').startsWith(y+'-'+mm));
-  const cin=a.reduce((t,r)=>t+r.cin,0), d=a.reduce((t,r)=>t+r.dues,0), out=a.reduce((t,r)=>t+r.cout,0);
-  return {n:RP_SHORT[i],cin,d,out,masuk:cin+d,net:cin+d-out};
- });
- $('rpChartTitle').textContent='Grafik Kas Masuk vs Kas Keluar per Bulan '+y;
- const max=Math.max(1,...monthly.flatMap(x=>[x.masuk,x.out]));
- $('rpChartIO').innerHTML='<div class="chartgrid">'+monthly.map(x=>{
-   const ih=Math.max(2,Math.round(x.masuk/max*170)), oh=Math.max(2,Math.round(x.out/max*170));
-   return `<div><div class="barcol"><div class="bar inbar" title="Kas masuk ${x.n}: ${rp(x.masuk)} (iuran ${rp(x.d)})" style="height:${ih}px"></div><div class="bar outbar" title="Kas keluar ${x.n}: ${rp(x.out)}" style="height:${oh}px"></div></div><div class="axislabel">${x.n}</div></div>`;
-  }).join('')+'</div><div class="legend"><span class="li">Kas masuk (termasuk iuran)</span><span class="lo">Kas keluar</span></div>';
-
- /* Saldo berjalan mulai dari saldo awal tahun yang dipilih. */
- const startY=y+'-01-01';
- const beforeYear=rows.filter(r=>r.date&&r.date<startY);
- let run=opening+beforeYear.reduce((t,r)=>t+r.cin+r.dues-r.cout,0);
- const balances=monthly.map(x=>{run+=x.net;return run});
- const lo=Math.min(0,...balances), hi=Math.max(1,...balances), span=hi-lo||1;
- $('rpChartBal').innerHTML='<h4 style="margin:20px 0 5px">Grafik Saldo Berjalan per Bulan '+y+'</h4><div class="chartgrid" style="height:180px">'+
-  balances.map((v,i)=>{const h=Math.max(3,Math.round((v-lo)/span*145));
-   return `<div><div class="barcol" style="height:155px"><div class="bar balbar" title="Saldo akhir ${monthly[i].n}: ${rp(v)}" style="height:${h}px;width:70%"></div></div><div class="axislabel">${monthly[i].n}</div></div>`;
-  }).join('')+'</div><div class="legend"><span class="lb">Saldo akhir bulan</span></div>';
 }
 async function refreshReport(){ if(accessToken){await load()} renderReport(); }
 function resetReportFilter(){ $('rpMonth').value='';$('rpCat').value='';$('rpQ').value='';renderReport(); }
