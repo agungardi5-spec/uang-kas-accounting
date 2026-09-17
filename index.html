@@ -70,7 +70,8 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div id="appShell" style="display:none">
 <header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V9.0</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
-<nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="activities">Kegiatan</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings" data-admin-only>Koneksi</button></nav></header>
+<nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="activities">Kegiatan</button>
+<button class="tab" data-v="audit" data-admin-only>Audit Log</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings" data-admin-only>Koneksi</button></nav></header>
 <main>
 <section id="dashboard" class="view active"><div class="panel" style="margin-top:0;margin-bottom:14px"><b>Dashboard Kas Terintegrasi</b><div class="notice">Iuran anggota otomatis dihitung sebagai kas masuk pada saldo akhir.</div></div><div class="grid">
 <div class="card"><div class="label">Saldo Awal</div><div id="opening" class="value">Rp0</div></div>
@@ -156,6 +157,14 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  </div>
 </section>
 
+<section id="audit" class="view">
+<div class="panel">
+<h2>Audit Log</h2>
+<p class="muted">Riwayat aktivitas aplikasi. Hanya Admin yang dapat melihatnya.</p>
+<div class="toolbar"><button class="btn secondary" onclick="loadAuditLogs()">🔄 Refresh</button><button class="btn secondary" onclick="exportAuditCSV()">📥 Export CSV</button></div>
+<div id="auditSummary" class="muted" style="margin:10px 0"></div>
+<div class="table-wrap"><table id="auditTable"><thead><tr><th>Waktu</th><th>User</th><th>Aksi</th><th>Modul</th><th>Keterangan</th></tr></thead><tbody><tr><td colspan="5">Belum ada data.</td></tr></tbody></table></div>
+</div></section>
 <section id="settings" class="view"><div class="panel"><h3>Koneksi Supabase</h3>
 <p class="notice">Masukkan <b>Project URL</b> dan <b>Publishable key</b> dari tombol Connect di Supabase. Setelah tersimpan, pengguna harus login dengan akun Supabase Auth. Nilai disimpan hanya di browser ini. Jika tombol tidak merespons, gunakan versi terbaru ini karena tidak bergantung pada library eksternal.</p>
 <label>Project URL</label><input id="url" placeholder="https://xxxx.supabase.co"><br><br><label>Publishable Key</label><input id="key" type="password" placeholder="sb_publishable_..."><br><br>
@@ -518,12 +527,12 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 $('txForm').onsubmit=async e=>{e.preventDefault();let i=+$('cin').value||0,o=+$('cout').value||0;if(!i&&!o)return alert('Isi kas masuk atau kas keluar.');try{
  const f=$('billPhoto').files[0]; let photo=null;
  if(f){photo='bills/'+currentUser.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+fileExt(f);await storageUpload('bill-photos',photo,f);}
- await rest('transactions',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({transaction_date:$('date').value,description:$('desc').value,cash_in:i,cash_out:o,category:$('cat').value,pic:$('pic').value,bill_photo_path:photo})});
+ await rest('transactions',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({transaction_date:$('date').value,description:$('desc').value,cash_in:i,cash_out:o,category:$('cat').value,pic:$('pic').value,bill_photo_path:photo})}); await writeAudit('CREATE','TRANSAKSI',$('desc').value||'Tambah transaksi');
  e.target.reset();$('date').value=new Date().toISOString().slice(0,10);await load()
  }catch(err){alert(err.message)}};
 async function delTx(id){if(confirm('Hapus transaksi ini?')){try{
  const x=transactions.find(t=>t.id===id);
- await rest('transactions?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}});
+ await rest('transactions?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}}); await writeAudit('DELETE','TRANSAKSI','Hapus transaksi ID '+id);
  if(x?.bill_photo_path){try{await storageDelete('bill-photos',x.bill_photo_path)}catch(_){}}
  await load()
  }catch(err){alert(err.message)}}}
@@ -547,7 +556,7 @@ $('editForm').onsubmit=async e=>{
   await rest('transactions?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({
    transaction_date:$('editDate').value,description:$('editDesc').value,cash_in:+$('editIn').value||0,
    cash_out:+$('editOut').value||0,category:$('editCat').value,pic:$('editPic').value
-  })});
+  })}); await writeAudit('UPDATE','TRANSAKSI','Edit transaksi ID '+id);
   cancelEdit(); await load();
  }catch(err){alert(err.message)}
 };
@@ -566,19 +575,19 @@ $('activityForm').onsubmit=async e=>{e.preventDefault();try{
  const f=$('actPhoto').files[0];if(!f)return alert('Pilih foto kegiatan.');
  const path='activities/'+currentUser.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+fileExt(f);
  await storageUpload('activity-photos',path,f);
- await rest('activities',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({activity_date:$('actDate').value,name:$('actName').value,description:$('actDesc').value,photo_path:path,created_by:currentUser.id})});
+ await rest('activities',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({activity_date:$('actDate').value,name:$('actName').value,description:$('actDesc').value,photo_path:path,created_by:currentUser.id})}); await writeAudit('CREATE','KEGIATAN',$('actName').value||'Tambah kegiatan');
  e.target.reset();$('actDate').value=new Date().toISOString().slice(0,10);await loadActivities();
 }catch(err){alert(err.message)}};
 $('actSearch').oninput=loadActivities;
 async function deleteActivity(id){if(currentRole!=='admin')return;if(!confirm('Hapus dokumentasi kegiatan ini?'))return;try{
  const a=await rest('activities?id=eq.'+encodeURIComponent(id)+'&select=photo_path')||[];
- await rest('activities?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}});
+ await rest('activities?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}}); await writeAudit('DELETE','KEGIATAN','Hapus kegiatan ID '+id);
  if(a[0]?.photo_path){try{await storageDelete('activity-photos',a[0].photo_path)}catch(_){}}
  await loadActivities();
 }catch(e){alert(e.message)}}
 
 async function addMember(){let n=$('newName').value.trim();if(!n)return;try{await rest('members',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({name:n})});$('newName').value='';await load()}catch(err){alert(err.message)}}
-async function pay(){let id=+$('m').value, month=$('pm').value+'-15',amount=+$('pa').value||0;try{await rest('member_payments',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({member_id:id,payment_month:month,amount})});await load()}catch(err){alert(err.message)}}
+async function pay(){let id=+$('m').value, month=$('pm').value+'-15',amount=+$('pa').value||0;try{await rest('member_payments',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({member_id:id,payment_month:month,amount})}); await writeAudit('UPSERT','IURAN','Simpan iuran anggota ID '+id);await load()}catch(err){alert(err.message)}}
 async function delPayment(id){if(currentRole!=='admin'){alert('Hanya Admin yang dapat menghapus iuran.');return}if(!confirm('Hapus iuran ini? Data akan langsung dihapus dan saldo/laporan akan dihitung ulang.'))return;try{const d=await adminApi('delete_payment',{payment_id:id});if(!d?.success)throw new Error(d?.error||'Gagal menghapus iuran.');await load()}catch(err){alert(err.message)}}
 async function delPayment(id){
   if(currentRole!=='admin'){alert('Hanya Admin yang dapat menghapus iuran.');return}
@@ -589,7 +598,7 @@ async function delPayment(id){
     await load();
   }catch(err){alert(err.message)}
 }
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if((b.dataset.v==='users'||b.dataset.v==='settings')&&currentRole!=='admin')return;document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(b.dataset.v).classList.add('active');if(b.dataset.v==='users')loadUsers();if(b.dataset.v==='reports')renderReport();if(b.dataset.v==='activities')loadActivities()});
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if((b.dataset.v==='users'||b.dataset.v==='settings'||b.dataset.v==='audit')&&currentRole!=='admin')return;document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(b.dataset.v).classList.add('active');if(b.dataset.v==='users')loadUsers();if(b.dataset.v==='reports')renderReport();if(b.dataset.v==='activities')loadActivities();if(b.dataset.v==='audit')loadAuditLogs()});
 $('q').oninput=renderTx;$('mo').oninput=renderTx;$('yearFilter').onchange=render;$('monthFilter').onchange=render;['rpYear','rpMonth','rpCat'].forEach(id=>$(id).onchange=renderReport);$('rpQ').oninput=renderReport;
 $('url').value=localStorage.getItem('supabase_url')||'';$('key').value=localStorage.getItem('supabase_key')||'';$('date').value=new Date().toISOString().slice(0,10);$('actDate').value=new Date().toISOString().slice(0,10);
 $('loginForm').onsubmit=e=>{e.preventDefault();login()};$('logoutBtn').onclick=logout;
@@ -682,6 +691,58 @@ document.addEventListener('DOMContentLoaded',()=>{
     obs.observe(tx,{childList:true,subtree:true});
   }
   enforceUserTransactionView();
+});
+
+
+// V10.2 — Audit Log menggunakan REST helper "rest" yang memang dipakai aplikasi.
+async function writeAudit(action,module,description){
+  try{
+    if(!accessToken || !currentUser || !currentUser.id) return;
+    await rest('audit_logs',{
+      method:'POST',
+      headers:{Prefer:'return=minimal'},
+      body:JSON.stringify({
+        user_id:currentUser.id,
+        action:String(action||''),
+        module:String(module||''),
+        description:String(description||'')
+      })
+    });
+  }catch(e){ console.warn('Audit log gagal:',e); }
+}
+async function loadAuditLogs(){
+  if(currentRole!=='admin') return;
+  try{
+    const rows=await rest('audit_logs?select=id,created_at,action,module,description,user_id&order=created_at.desc&limit=500')||[];
+    const tb=document.querySelector('#auditTable tbody');
+    if(!tb)return;
+    tb.innerHTML=rows.length?rows.map(r=>`<tr>
+<td>${new Date(r.created_at).toLocaleString('id-ID')}</td>
+<td>${esc((r.user_id===currentUser?.id?(currentUsername||currentUser?.email):r.user_id)||'-')}</td>
+<td>${esc(r.action||'-')}</td>
+<td>${esc(r.module||'-')}</td>
+<td>${esc(r.description||'-')}</td>
+</tr>`).join(''):'<tr><td colspan="5">Belum ada aktivitas.</td></tr>';
+    const sm=document.getElementById('auditSummary');
+    if(sm)sm.textContent=`Menampilkan ${rows.length} aktivitas terbaru.`;
+  }catch(e){
+    console.error('Audit load:',e);
+    const tb=document.querySelector('#auditTable tbody');
+    if(tb)tb.innerHTML='<tr><td colspan="5">Gagal memuat Audit Log: '+esc(e.message)+'</td></tr>';
+  }
+}
+function exportAuditCSV(){
+ const rows=[['Waktu','User','Aksi','Modul','Keterangan']];
+ document.querySelectorAll('#auditTable tbody tr').forEach(tr=>{
+   const vals=[...tr.children].map(td=>td.textContent.trim());
+   if(vals.length===5)rows.push(vals);
+ });
+ const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='Audit_Log.csv';a.click();URL.revokeObjectURL(a.href);
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('.tab[data-v="audit"]');
+ if(b && currentRole==='admin') setTimeout(loadAuditLogs,100);
 });
 
 </script></body></html>
