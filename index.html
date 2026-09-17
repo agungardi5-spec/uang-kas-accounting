@@ -73,7 +73,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div id="appShell" style="display:none">
 <header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V8.6</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
-<nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings">Koneksi</button></nav></header>
+<nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="users" data-admin-only>Pengguna</button><button class="tab" data-v="settings" data-admin-only>Koneksi</button></nav></header>
 <main>
 <section id="dashboard" class="view active"><div class="panel" style="margin-top:0;margin-bottom:14px"><b>Dashboard Kas Terintegrasi</b><div class="notice">Iuran anggota otomatis dihitung sebagai kas masuk pada saldo akhir.</div></div><div class="grid">
 <div class="card"><div class="label">Saldo Awal</div><div id="opening" class="value">Rp0</div></div>
@@ -254,6 +254,7 @@ function applyRoleUI(){
  const admin=currentRole==='admin';
  // Admin only: add members and delete transactions. Everyone authenticated: add/edit transactions and payments.
  document.querySelectorAll('[data-admin-only]').forEach(x=>x.style.display=admin?'':'none');
+  if(!admin && $('settings')?.classList.contains('active')){document.querySelector('[data-v=dashboard]')?.click();}
 }
 function render(){
  const dues=payments.reduce((s,x)=>s+(+x.amount||0),0);
