@@ -28,7 +28,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
   border:1px solid #cbd5e1;
   box-shadow:0 2px 5px rgba(0,0,0,.15);
 }
-}.user-active{color:#087f5b}.user-disabled{color:#991b1b}@media(max-width:650px){.head{align-items:flex-start}.toolbar>*{min-width:100%}}\n
+}.user-active{color:#991b1b}.user-disabled{color:#991b1b}@media(max-width:650px){.head{align-items:flex-start}.toolbar>*{min-width:100%}}\n
 /* Kartu ringkasan laporan: 6 kartu -> 3 kolom, tetap responsif di Android. */
 .grid6{grid-template-columns:repeat(3,1fr)}
 @media(max-width:750px){.grid6{grid-template-columns:1fr 1fr}}
@@ -61,24 +61,6 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <style>
   .admin-only-feature { }
 </style>
- /* FIX USER BADGE */
-.user-role,
-.user-admin {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: 1px solid #cbd5e1 !important;
-    padding: 7px 13px !important;
-    border-radius: 999px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-    opacity: 1 !important;
-    text-shadow: none !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,.12) !important;
-}
 
 </style>
 </head>
@@ -98,7 +80,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  </div>
 </div>
 <div id="appShell" style="display:none">
-<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026 V12.8</div><div class="sub">Database Supabase • Online</div></div>
+<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
 <nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="activities">Kegiatan</button>
 <button class="tab" data-v="dues-monitor">Monitoring Iuran</button>
