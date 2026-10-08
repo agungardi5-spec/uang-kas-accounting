@@ -16,7 +16,18 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  header,nav,.toolbar,.btn,.notice{display:none!important}body{background:white}.panel,.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.view{display:block!important}
 }
 .chartgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;align-items:end;height:220px;padding:8px 0}.barcol{height:200px;display:flex;align-items:flex-end;justify-content:center;gap:3px}.bar{width:45%;min-width:4px;border-radius:5px 5px 0 0}.inbar{background:#0b8f6a}.outbar{background:#d14343}.balbar{background:#334155}.axislabel{text-align:center;font-size:11px}.legend{display:flex;gap:16px;font-size:12px;margin-top:8px}.legend span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}.legend .li:before{background:#0b8f6a}.legend .lo:before{background:#d14343}.legend .lb:before{background:#334155}
-.user-role{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;background:#e9eef7}.user-admin{background:#fef3c7;color:#92400e}.user-active{color:#087f5b}.user-disabled{color:#991b1b}@media(max-width:650px){.head{align-items:flex-start}.toolbar>*{min-width:100%}}\n
+.user-role{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  background:#ffffff;
+  color:#0f172a;
+  border:1px solid #cbd5e1;
+  box-shadow:0 2px 6px rgba(15,23,42,.15);
+  letter-spacing:.2px;
+}.user-active{color:#087f5b}.user-disabled{color:#991b1b}@media(max-width:650px){.head{align-items:flex-start}.toolbar>*{min-width:100%}}\n
 /* Kartu ringkasan laporan: 6 kartu -> 3 kolom, tetap responsif di Android. */
 .grid6{grid-template-columns:repeat(3,1fr)}
 @media(max-width:750px){.grid6{grid-template-columns:1fr 1fr}}
