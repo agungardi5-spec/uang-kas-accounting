@@ -384,44 +384,83 @@ function applyRoleUI(){
  document.querySelectorAll('[data-admin-only]').forEach(x=>x.style.display=admin?'':'none');
   if(!admin && $('settings')?.classList.contains('active')){document.querySelector('[data-v=dashboard]')?.click();}
 }
+
 function render(){
  const dues=payments.reduce((s,x)=>s+(+x.amount||0),0);
  const txIn=transactions.reduce((s,x)=>s+(+x.cash_in||0),0);
  const tout=transactions.reduce((s,x)=>s+(+x.cash_out||0),0);
  const bal=opening+txIn+dues-tout;
- $('opening').textContent=rp(opening); $('tin').textContent=rp(txIn+dues);
- $('dues').textContent=rp(dues); $('otherin').textContent=rp(txIn);
- $('tout').textContent=rp(tout); $('bal').textContent=rp(bal);
 
- const ms=['01','02','03','04','05','06','07','08','09','10','11','12'],
- names=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+ $('opening').textContent=rp(opening);
+ $('tin').textContent=rp(txIn+dues);
+ $('dues').textContent=rp(dues);
+ $('otherin').textContent=rp(txIn);
+ $('tout').textContent=rp(tout);
+ $('bal').textContent=rp(bal);
+
+ const ms=['01','02','03','04','05','06','07','08','09','10','11','12'];
+ const names=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
  const year=$('yearFilter')?.value||'2026';
- const monthly=ms.map((m,i)=>{
-   let a=transactions.filter(x=>(x.transaction_date||'').slice(0,7)===year+'-'+m);
-   let inn=a.reduce((s,x)=>s+(+x.cash_in||0),0);
-   let out=a.reduce((s,x)=>s+(+x.cash_out||0),0);
-   let d=payments.filter(p=>(p.payment_month||'').slice(0,7)===year+'-'+m).reduce((s,x)=>s+(+x.amount||0),0);
+ const selectedMonth=$('monthFilter')?.value||'';
+
+ const monthlyAll=ms.map((m,i)=>{
+   const a=transactions.filter(x=>(x.transaction_date||'').slice(0,7)===year+'-'+m);
+   const inn=a.reduce((s,x)=>s+(+x.cash_in||0),0);
+   const out=a.reduce((s,x)=>s+(+x.cash_out||0),0);
+   const d=payments.filter(p=>(p.payment_month||'').slice(0,7)===year+'-'+m)
+     .reduce((s,x)=>s+(+x.amount||0),0);
    return {m,n:names[i],inn,out,d,net:inn+d-out};
  });
+
+ // Filter grafik berdasarkan bulan yang dipilih.
+ const monthly=selectedMonth
+   ? monthlyAll.filter(x=>x.m===selectedMonth)
+   : monthlyAll;
+
  const max=Math.max(1,...monthly.flatMap(x=>[x.inn+x.d,x.out]));
- $('chart').innerHTML=`<div class="chartgrid">`+
- monthly.map(x=>{let ih=Math.max(2,Math.round((x.inn+x.d)/max*170)),oh=Math.max(2,Math.round(x.out/max*170));return `<div><div class="barcol"><div class="bar inbar" title="Masuk + iuran ${rp(x.inn+x.d)}" style="height:${ih}px"></div><div class="bar outbar" title="Keluar ${rp(x.out)}" style="height:${oh}px"></div></div><div class="axislabel">${x.n}</div></div>`}).join('')+
-`</div><div class="legend"><span class="li">Kas masuk + iuran</span><span class="lo">Kas keluar</span></div>`;
+ $('chart').innerHTML='<div class="chartgrid">'+
+ monthly.map(x=>{
+   const ih=Math.max(2,Math.round((x.inn+x.d)/max*170));
+   const oh=Math.max(2,Math.round(x.out/max*170));
+   return `<div><div class="barcol">
+   <div class="bar inbar" title="Masuk + iuran ${rp(x.inn+x.d)}" style="height:${ih}px"></div>
+   <div class="bar outbar" title="Keluar ${rp(x.out)}" style="height:${oh}px"></div>
+   </div><div class="axislabel">${x.n}</div></div>`;
+ }).join('')+
+ '</div><div class="legend"><span class="li">Kas masuk + iuran</span><span class="lo">Kas keluar</span></div>';
 
+ // Saldo berjalan tetap dihitung dari Januari agar saldo bulan terpilih akurat.
  let run=opening;
- const balances=monthly.map(x=>{run+=x.net;return run});
- const bm=Math.max(opening,...balances,1);
- $('balanceChart').innerHTML=`<h4 style="margin:18px 0 5px">Grafik Saldo Berjalan</h4><div class="chartgrid" style="height:180px">`+
- balances.map((v,i)=>{let h=Math.max(3,Math.round(v/bm*145));return `<div><div class="barcol" style="height:155px"><div class="bar balbar" title="Saldo ${monthly[i].n}: ${rp(v)}" style="height:${h}px;width:70%"></div></div><div class="axislabel">${monthly[i].n}</div></div>`}).join('')+
-`</div>`;
+ const balancesAll=monthlyAll.map(x=>{run+=x.net;return run});
+ const balances=selectedMonth
+   ? [balancesAll[ms.indexOf(selectedMonth)]]
+   : balancesAll;
+ const balanceMonths=selectedMonth
+   ? monthly
+   : monthlyAll;
+ const bm=Math.max(opening,...balancesAll,1);
 
- $('monthly').innerHTML=`<div class="tablewrap"><table style="min-width:620px"><thead><tr><th>Bulan</th><th>Kas Masuk</th><th>Kas Keluar</th><th>Net</th><th>Saldo</th></tr></thead><tbody>`+
- monthly.map((x,i)=>`<tr><td><b>${x.n}</b></td><td class="green">${rp(x.inn+x.d)}</td><td class="red">${rp(x.out)}</td><td><b>${rp(x.net)}</b></td><td><b>${rp(balances[i])}</b></td></tr>`).join('')+
-`</tbody></table></div>`;
+ $('balanceChart').innerHTML='<h4 style="margin:18px 0 5px">Grafik Saldo Berjalan</h4>'+
+ '<div class="chartgrid" style="height:180px">'+
+ balances.map((v,i)=>{
+   const h=Math.max(3,Math.round(v/bm*145));
+   return `<div><div class="barcol" style="height:155px">
+   <div class="bar balbar" title="Saldo ${balanceMonths[i].n}: ${rp(v)}" style="height:${h}px;width:70%"></div>
+   </div><div class="axislabel">${balanceMonths[i].n}</div></div>`;
+ }).join('')+'</div>';
+
+ // Tabel bulanan tetap menampilkan semua bulan.
+ $('monthly').innerHTML='<div class="tablewrap"><table style="min-width:620px">'+
+ '<thead><tr><th>Bulan</th><th>Kas Masuk</th><th>Iuran</th><th>Kas Keluar</th><th>Net</th><th>Saldo</th></tr></thead><tbody>'+
+ monthlyAll.map((x,i)=>`<tr><td><b>${x.n}</b></td><td class="green">${rp(x.inn)}</td><td class="green">${rp(x.d)}</td><td class="red">${rp(x.out)}</td><td><b>${rp(x.net)}</b></td><td><b>${rp(balancesAll[i])}</b></td></tr>`).join('')+
+ '</tbody></table></div>';
 
  const totalPay=payments.reduce((s,x)=>s+(+x.amount||0),0);
  $('memberSummary').innerHTML=`<div class="grid" style="grid-template-columns:repeat(3,1fr)"><div><div class="label">Anggota</div><div class="value">${members.length}</div></div><div><div class="label">Iuran Tercatat</div><div class="value green">${rp(totalPay)}</div></div><div><div class="label">Pembayaran</div><div class="value">${payments.length}</div></div></div>`;
- renderTx(); renderMembers(); renderReport();
+
+ renderTx();
+ renderMembers();
+ renderReport();
 }
 function renderTx(){
  let q=($('q').value||'').toLowerCase(),mo=$('mo').value||'',bal=opening;
