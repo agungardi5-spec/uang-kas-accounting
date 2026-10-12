@@ -404,6 +404,13 @@ body{background:radial-gradient(ellipse at 90% 0%,rgba(10,157,141,.075),transpar
 @media(prefers-reduced-motion:reduce){#appShell *,#appShell *:before,#appShell *:after{transition:none!important;scroll-behavior:auto!important}}
 
 </style>
+
+<style id="fix-user-label-contrast">
+/* Improve logged-in username visibility on the dark header. */
+header #userInfo{color:#17324a!important;background:#f7fbff!important;border:1px solid #d8e5ee!important;font-weight:800!important;opacity:1!important;text-shadow:none!important;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+header #userInfo:empty{display:none!important}
+header #status{color:#08765e!important}
+</style>
 </head>
 <body>
 <div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#f4f7fb">
