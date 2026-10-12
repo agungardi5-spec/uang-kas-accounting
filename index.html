@@ -286,6 +286,124 @@ body{background:radial-gradient(ellipse at 90% 0%,rgba(15,155,142,.08),transpare
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
 </style>
 
+<style id="dashboard-executive-v5">
+/* Executive Finance Edition V5 — visual-only enhancements */
+:root{
+  --exec-navy:#0c2438;--exec-navy2:#123c52;--exec-teal:#0a9d8d;
+  --exec-ink:#142b3e;--exec-muted:#6b7f90;--exec-line:#dce7ee;
+  --exec-bg:#eef4f7;--exec-shadow:0 12px 32px rgba(15,42,61,.075)
+}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 90% 0%,rgba(10,157,141,.075),transparent 33%),var(--exec-bg);color:var(--exec-ink);letter-spacing:.005em}
+#appShell header{background:linear-gradient(112deg,#0c2438 0%,#123b53 58%,#116a6b 100%);padding:14px 24px 12px;border-bottom:3px solid #15b6a2;box-shadow:0 8px 26px rgba(12,36,56,.18)}
+#appShell .head{max-width:1360px;gap:18px}
+#appShell .brand{font-size:21px;letter-spacing:-.025em}
+#appShell .brand img{box-shadow:0 3px 10px rgba(0,0,0,.12)}
+#appShell .sub{margin-top:5px;color:#d9e8f0;opacity:.92}
+#appShell nav{max-width:1360px;gap:7px;margin-top:13px}
+#appShell .tab{background:rgba(255,255,255,.105);border:1px solid rgba(255,255,255,.13);color:#eef7fa;padding:10px 14px;border-radius:10px;transition:background .18s ease,transform .18s ease,border-color .18s ease}
+#appShell .tab:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.28);transform:translateY(-1px)}
+#appShell .tab.active{background:#fff;color:#102c42;border-color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+#appShell #logoutBtn{background:#fff;color:#102c42;border:1px solid rgba(255,255,255,.5)}
+#appShell main{max-width:1360px;padding:0 20px;margin:24px auto 40px}
+#appShell .panel,#appShell .card{border:1px solid #dce7ee;border-radius:17px;box-shadow:var(--exec-shadow);background:rgba(255,255,255,.97)}
+#appShell .panel{padding:20px;margin-top:16px}
+#dashboard>.panel:first-child{position:relative;overflow:hidden;background:linear-gradient(105deg,#fff 0%,#f3fbfa 100%);border-left:4px solid var(--exec-teal);padding:23px 24px;margin-bottom:16px!important}
+#dashboard>.panel:first-child:after{content:"FINANCE CONTROL  •  2026";position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:850;letter-spacing:.16em;color:#087f75;background:#e2f6f2;border:1px solid #c5ece5;border-radius:999px;padding:9px 13px}
+#dashboard>.panel:first-child b{font-size:17px;letter-spacing:-.015em}
+#dashboard>.panel:first-child .notice{margin-top:6px;max-width:72%;line-height:1.6}
+#dashboard .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#dashboard .card{position:relative;overflow:hidden;min-height:100px;padding:18px 20px;background:linear-gradient(145deg,#fff 0%,#f8fbfd 100%);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+#dashboard .card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:#b8cbd7}
+#dashboard .card:nth-child(2):before,#dashboard .card:nth-child(3):before,#dashboard .card:nth-child(4):before{background:var(--exec-teal)}
+#dashboard .card:nth-child(5):before{background:#e45b68}
+#dashboard .card:nth-child(6):before{background:#174b67}
+#dashboard .card:hover{transform:translateY(-2px);box-shadow:0 15px 32px rgba(15,42,61,.11);border-color:#c5dbe4}
+#dashboard .label{font-size:10px;font-weight:800;letter-spacing:.105em;text-transform:uppercase;color:#718596}
+#dashboard .value{font-size:clamp(22px,2vw,28px);line-height:1.25;letter-spacing:-.035em;margin-top:10px;font-variant-numeric:tabular-nums}
+#dashboard .green,#dashboard .white{color:#078878}
+#dashboard .red{color:#d04451}
+#appShell .panel h3,#appShell .panel h4{color:#17384d;letter-spacing:-.015em}
+#appShell .panel h3{display:flex;align-items:center;gap:10px;font-size:16px;margin:0 0 16px}
+#appShell .panel h3:before{content:"";display:inline-block;width:4px;height:18px;border-radius:4px;background:linear-gradient(#14b7a4,#087f75);flex:0 0 4px}
+#dashboard .toolbar{display:grid;grid-template-columns:minmax(120px,.85fr) minmax(160px,1fr) minmax(160px,1fr) minmax(150px,1fr);gap:10px;margin-bottom:14px}
+#dashboard .toolbar>*{min-width:0;width:100%;min-height:44px;border-radius:11px}
+#appShell input,#appShell select,#appShell textarea{background:#fff;border-color:#d3e0e8;border-radius:10px;min-height:40px;color:#19354a;transition:border-color .18s ease,box-shadow .18s ease}
+#appShell input:focus,#appShell select:focus,#appShell textarea:focus{border-color:#13a99a;box-shadow:0 0 0 3px rgba(19,169,154,.12);outline:none}
+#appShell .btn{border-radius:10px;transition:transform .16s ease,box-shadow .16s ease,background .16s ease}
+#appShell .btn:hover{transform:translateY(-1px);box-shadow:0 5px 13px rgba(16,42,61,.09)}
+#appShell .btn.primary{background:linear-gradient(110deg,#102b42,#17546a);color:#fff}
+#appShell .btn.secondary{background:#edf4f7;border:1px solid #d9e6ed;color:#19384e}
+#dashboard #chart,#dashboard #balanceChart{border:1px solid #e3edf2;border-radius:14px;background:linear-gradient(180deg,#fcfefe,#fff);padding:13px 14px 10px;overflow:hidden}
+#dashboard #chart .chartgrid{gap:clamp(3px,.6vw,9px);height:230px;padding:12px 0 0;border-bottom:1px solid #dce8ef;background:repeating-linear-gradient(to bottom,transparent 0,transparent 48px,rgba(215,229,237,.55) 49px,transparent 50px)}
+#dashboard #chart .barcol{height:205px;gap:4px}
+#dashboard #chart .bar{width:46%;border-radius:6px 6px 2px 2px;box-shadow:0 3px 6px rgba(19,45,61,.08);transition:opacity .18s ease,filter .18s ease}
+#dashboard #chart .inbar{background:linear-gradient(180deg,#1ab99a,#07836f)}
+#dashboard #chart .outbar{background:linear-gradient(180deg,#f16e78,#cf3e4c)}
+#dashboard #balanceChart{margin-top:12px}
+#dashboard #balanceChart .chartgrid{height:205px!important;gap:clamp(3px,.6vw,9px);padding-top:10px;border-bottom:1px solid #dce8ef;background:repeating-linear-gradient(to bottom,transparent 0,transparent 44px,rgba(215,229,237,.55) 45px,transparent 46px)}
+#dashboard #balanceChart .barcol{height:165px!important}
+#dashboard #balanceChart .balbar{background:linear-gradient(180deg,#66849b,#153c57);border-radius:6px 6px 2px 2px;box-shadow:0 3px 6px rgba(19,45,61,.1)}
+#appShell .axislabel{font-size:11px;font-weight:650;color:#61798b;padding-top:4px}
+#appShell .legend{gap:8px;flex-wrap:wrap;margin-top:10px}
+#appShell .legend span{font-size:11px;color:#5d7385;background:#f3f7f9;border:1px solid #e1ebf0;padding:6px 10px;border-radius:999px}
+#appShell .tablewrap{border:1px solid #dce7ee;border-radius:12px;max-height:560px;box-shadow:0 3px 12px rgba(16,42,61,.035)}
+#appShell table{border-collapse:separate;border-spacing:0;min-width:780px}
+#appShell th{background:#edf4f7;color:#466176;font-size:10px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid #d9e6ed;padding:12px 11px}
+#appShell td{padding:11px;border-bottom:1px solid #eaf0f4;color:#263e50;font-variant-numeric:tabular-nums}
+#appShell tbody tr:nth-child(even) td{background:#f9fbfc}
+#appShell tbody tr:hover td{background:#eef8f7}
+#appShell tbody tr:last-child td{border-bottom:0}
+#appShell .status{font-weight:750;border:1px solid rgba(255,255,255,.22)}
+#appShell .ok{background:#dff7ed;color:#087b61;border-color:#bdebdc}
+#appShell .err{background:#fff0f0;color:#b83242;border-color:#f7d1d5}
+#appShell button:focus-visible,#appShell input:focus-visible,#appShell select:focus-visible,#appShell textarea:focus-visible{outline:3px solid rgba(10,157,141,.25);outline-offset:2px}
+@media(max-width:1000px){
+ #appShell main{padding:0 14px;margin-top:18px}
+ #appShell #dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #dashboard .toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #dashboard>.panel:first-child:after{display:none}
+ #dashboard>.panel:first-child .notice{max-width:100%}
+}
+@media(max-width:650px){
+ #appShell header{padding:12px 13px 8px}
+ #appShell .head{align-items:flex-start}
+ #appShell .brand{font-size:16px;gap:8px!important}
+ #appShell .brand img{height:34px!important;max-width:82px!important}
+ #appShell .sub{font-size:11px}
+ #appShell .head>div:last-child{gap:5px!important;flex-wrap:wrap;justify-content:flex-end}
+ #appShell .head .status{font-size:10px;padding:5px 7px}
+ #appShell #logoutBtn{padding:7px 9px;font-size:12px}
+ #appShell nav{gap:6px;margin-top:10px;flex-wrap:nowrap;overflow-x:auto;padding:0 0 9px;scrollbar-width:thin}
+ #appShell nav .tab{white-space:nowrap;flex:0 0 auto;padding:8px 11px;font-size:12px}
+ #appShell main{padding:0 10px;margin:14px auto 24px}
+ #appShell .panel{padding:14px;border-radius:14px;margin-top:12px}
+ #dashboard>.panel:first-child{padding:16px!important}
+ #dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ #dashboard .card{padding:13px 12px 13px 15px;min-height:83px;border-radius:13px}
+ #dashboard .value{font-size:clamp(17px,4.5vw,22px);margin-top:8px;overflow-wrap:anywhere}
+ #dashboard .label{font-size:9px;letter-spacing:.06em}
+ #dashboard .toolbar{grid-template-columns:1fr;gap:8px}
+ #dashboard .toolbar>*{min-height:42px}
+ #dashboard #chart,#dashboard #balanceChart{padding:9px 8px}
+ #dashboard #chart .chartgrid,#dashboard #balanceChart .chartgrid{min-width:570px}
+ #dashboard #chart,#dashboard #balanceChart{overflow-x:auto;overscroll-behavior-x:contain}
+ #dashboard .panel h3{font-size:15px}
+ #appShell th,#appShell td{padding:9px;font-size:11px}
+}
+@media(max-width:380px){
+ #dashboard .grid{grid-template-columns:1fr}
+ #appShell .brand{font-size:15px}
+ #appShell .head>div:last-child{max-width:46%}
+}
+@media print{
+ #appShell header{background:#fff!important;color:#111!important;box-shadow:none!important;border-bottom:1px solid #ddd!important}
+ #appShell .panel,#appShell .card{box-shadow:none!important;background:#fff!important}
+ #dashboard #chart,#dashboard #balanceChart{overflow:visible!important}
+}
+@media(prefers-reduced-motion:reduce){#appShell *,#appShell *:before,#appShell *:after{transition:none!important;scroll-behavior:auto!important}}
+
+</style>
 </head>
 <body>
 <div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#f4f7fb">
