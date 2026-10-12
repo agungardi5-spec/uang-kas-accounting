@@ -143,6 +143,59 @@ tfoot td{font-weight:800;background:#f4f8fa}
 }
 </style>
 
+
+<style id="dashboard-polish-v2">
+/* Visual-only refinement. Existing HTML IDs, application logic, and Supabase calls are unchanged. */
+:root{--navy:#10243a;--navy2:#173b56;--teal:#0f9b8e;--teal-dark:#087f75;--ink:#172b3a;--muted:#647789;--line:#dfe8ee;--page:#f3f7fa;--shadow-sm:0 3px 12px rgba(16,36,58,.045);--shadow-md:0 12px 30px rgba(16,36,58,.075)}
+body{background:radial-gradient(ellipse at 88% 8%,rgba(15,155,142,.055),transparent 26%),var(--page)!important}
+header{position:relative;isolation:isolate;background:linear-gradient(112deg,#10243a 0%,#173b56 64%,#126e70 100%);border-bottom:3px solid #2bb8a8}
+header:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.13;background-image:linear-gradient(135deg,transparent 0 48%,rgba(255,255,255,.12) 48% 49%,transparent 49% 100%);background-size:34px 34px}
+.head{gap:18px}
+.brand{line-height:1.15}
+.brand span{font-weight:850}
+.brand img{box-shadow:0 3px 10px rgba(0,0,0,.12)!important}
+nav{padding-top:2px}
+nav .tab{min-height:40px}
+main{padding-top:2px}
+#dashboard>.panel:first-child{position:relative;overflow:hidden;padding:22px 24px;background:linear-gradient(115deg,#fff 0%,#f7fcfb 70%,#eef9f7 100%);box-shadow:var(--shadow-sm)}
+#dashboard>.panel:first-child:after{content:"KAS TERINTEGRASI";position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:850;letter-spacing:1.4px;color:#0c8c80;background:#e0f5f1;border:1px solid #c5ebe4;border-radius:999px;padding:7px 11px}
+#dashboard>.panel:first-child .notice{max-width:75%;font-size:12px}
+#dashboard>.grid{gap:14px}
+#dashboard .card{min-height:88px;display:flex;flex-direction:column;justify-content:center;gap:7px;box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;background:linear-gradient(145deg,#fff,#fcfdfe)}
+#dashboard .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:#c8dce4}
+#dashboard .card:nth-child(2),#dashboard .card:nth-child(3),#dashboard .card:nth-child(4){background:linear-gradient(145deg,#fff,#f5fbfa)}
+#dashboard .card:nth-child(5){background:linear-gradient(145deg,#fff,#fff8f8)}
+#dashboard .card:nth-child(6){background:linear-gradient(145deg,#fff,#f6f9fc)}
+#dashboard .label{font-size:11px;letter-spacing:.75px}
+#dashboard .value{font-variant-numeric:tabular-nums;letter-spacing:-.7px}
+#dashboard>.panel:not(:first-child){box-shadow:var(--shadow-sm);padding:22px}
+#dashboard .panel h3{display:flex;align-items:center;gap:10px;margin-bottom:17px;font-size:16px}
+#dashboard .panel h3:before{content:"";display:inline-block;width:4px;height:17px;border-radius:4px;background:var(--teal)}
+#dashboard .toolbar{display:grid;grid-template-columns:minmax(130px,.8fr) minmax(150px,1fr) minmax(150px,1fr) minmax(150px,1fr);gap:10px;margin-bottom:14px}
+#dashboard .toolbar>*{min-width:0;width:100%;box-sizing:border-box}
+#dashboard .toolbar .btn{min-height:42px;white-space:nowrap}
+#chart,#balanceChart{border-radius:13px;background:linear-gradient(180deg,#fcfefe,#fff);padding:10px 12px 12px;border:1px solid #edf2f5;margin-top:10px}
+#chart .chartgrid{position:relative;isolation:isolate;background:repeating-linear-gradient(to top,transparent 0,transparent 48px,#eaf0f4 49px,#eaf0f4 50px);border-bottom:1px solid #dfe8ee;padding-top:10px}
+#chart .bar{box-shadow:0 2px 5px rgba(16,36,58,.09);transition:filter .15s ease,opacity .15s ease;border-radius:5px 5px 2px 2px}
+#chart .bar:hover{filter:brightness(1.08);opacity:.9}
+#chart .inbar{background:linear-gradient(180deg,#19b58b,#078365)}
+#chart .outbar{background:linear-gradient(180deg,#f06d74,#cc3e49)}
+#balanceChart .chartgrid{position:relative;background:repeating-linear-gradient(to top,transparent 0,transparent 39px,#eaf0f4 40px,#eaf0f4 41px);border-bottom:1px solid #dfe8ee}
+#balanceChart .balbar{background:linear-gradient(180deg,#5a7894,#173b56);box-shadow:0 2px 5px rgba(16,36,58,.1)}
+#chart .axislabel,#balanceChart .axislabel{color:#65788a;font-size:11px;font-weight:650;padding-top:5px}
+#chart .legend,#balanceChart .legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+#chart .legend span,#balanceChart .legend span{background:#f4f8fa;border:1px solid #e5edf1;border-radius:999px;padding:5px 9px;color:#526779;font-size:11px}
+#chart .legend span:before,#balanceChart .legend span:before{vertical-align:middle}
+#dashboard #monthly,#dashboard #memberSummary{overflow-x:auto;border-radius:12px}
+#dashboard #monthly table,#dashboard #memberSummary table{width:100%}
+#dashboard .panel:last-child{margin-bottom:8px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(15,155,142,.22);outline-offset:2px}
+@media(max-width:1000px){#dashboard .toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}#dashboard>.panel:first-child:after{display:none}#dashboard>.panel:first-child .notice{max-width:100%}}
+@media(max-width:600px){#dashboard>.panel:first-child{padding:17px}#dashboard>.panel:not(:first-child){padding:14px}#dashboard .toolbar{grid-template-columns:1fr}#chart,#balanceChart{padding:8px}#dashboard .card{min-height:78px}#dashboard .label{font-size:10px}#dashboard .value{font-size:clamp(17px,4.4vw,20px)}nav{padding-bottom:12px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media print{header:after,#dashboard>.panel:first-child:after{display:none!important}#chart,#balanceChart{background:#fff;border:0;padding:0}#dashboard .card{min-height:0}}
+</style>
+
 </head>
 <body>
 <div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#f4f7fb">
