@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uang Kas Accounting 2026</title>
+<title>Uang Kas Accounting</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;background:#f4f7fb;color:#172033}
 header{background:#0f172a;color:white;padding:16px 20px;position:sticky;top:0;z-index:5}.head{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;font-size:20px}.sub{font-size:12px;opacity:.7}
@@ -68,7 +68,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 <div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#f4f7fb">
  <div class="panel" style="width:min(420px,100%);margin:0">
   <div style="font-size:30px;margin-bottom:5px">💰</div>
-  <h2 style="margin:0 0 5px">Uang Kas Accounting 2026</h2>
+  <h2 style="margin:0 0 5px">Uang Kas Accounting</h2>
   <div class="notice" style="margin-bottom:18px">Login untuk mengakses data kas online.</div>
   <form id="loginForm">
    <div class="full"><label>Nama Pengguna</label><input id="loginUsername" type="text" autocomplete="username" required placeholder="Contoh: agungardi"></div>
@@ -80,7 +80,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
  </div>
 </div>
 <div id="appShell" style="display:none">
-<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting 2026</div><div class="sub">Database Supabase • Online</div></div>
+<header><div class="head"><div><div class="brand">💰 Uang Kas Accounting</div><div class="sub">Database Supabase • Online</div></div>
 <div style="display:flex;align-items:center;gap:8px"><span id="userInfo" class="status"></span><span id="status" class="status">Belum terhubung</span><button class="tab" id="logoutBtn" type="button">Keluar</button></div></div>
 <nav><button class="tab active" data-v="dashboard">Dashboard</button><button class="tab" data-v="transactions">Transaksi</button><button class="tab" data-v="members">Iuran Anggota</button><button class="tab" data-v="reports">Laporan</button><button class="tab" data-v="activities">Kegiatan</button>
 <button class="tab" data-v="dues-monitor">Monitoring Iuran</button>
@@ -143,7 +143,7 @@ form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
 </section>
 <section id="reports" class="view">
 <div class="printonly" style="margin-bottom:10px;border-bottom:2px solid #0f172a;padding-bottom:6px">
- <div style="font-size:17px;font-weight:800">Uang Kas Accounting 2026 &mdash; Laporan Kas</div>
+ <div style="font-size:17px;font-weight:800">Uang Kas Accounting &mdash; Laporan Kas</div>
  <div id="rpPrintMeta" style="font-size:10.5px;margin-top:4px"></div>
 </div>
 <div class="panel noprint" style="margin-top:0"><h3 style="margin-top:0">Laporan Kas</h3>
@@ -645,7 +645,7 @@ function printReport(){
 /* Export CSV mengikuti filter yang sedang dipilih. */
 function exportReportCSV(){
  const R=computeReport(), f=R.f, q=$('rpQ').value.trim();
- const rows=[['Laporan Kas — Uang Kas Accounting 2026'],
+ const rows=[['Laporan Kas — Uang Kas Accounting'],
   ['Periode',rpPeriodLabel(f)],['Kategori',f.cat||'Semua Kategori'],['Pencarian',q||'-'],
   ['Diunduh',new Date().toLocaleString('id-ID')],[],
   ['RINGKASAN'],['Saldo Awal',R.openingBal],['Total Kas Masuk',R.cashIn],['Total Iuran Anggota',R.dues],
